@@ -7,11 +7,11 @@
         First Name: <input type="text" name="first_name"><br>
         Last Name: <input type="text" name="last_name"><br>
 
-        <select id="day" name="day">
+        <select id="day" name="day">//same name doesn't matter
             <option value="">Day</option>
             <?php
             for ($i_day = 1; $i_day <= 31; $i_day++) {
-                $selected = isset($_GET['day']) && $_GET['day'] == $i_day ? ' selected' : '';
+                $selected = $selected_day == $i_day ? ' selected' : '';
                 echo '<option value="' . $i_day . '"' . $selected . '>' . $i_day . '</option>' . "\n";
             }
             ?>
@@ -20,9 +20,9 @@
         <select id="month" name="month">
             <option value="">Month</option>
             <?php
-            $selected_month = date('n');
+            $selected_month = date('F');
             for ($i_month = 1; $i_month <= 12; $i_month++) {
-                $selected = isset($_GET['month']) && $_GET['month'] == $i_month ? ' selected' : '';
+                $selected = $selected_month == $i_month ? ' selected' : '';
                 echo '<option value="' . $i_month . '"' . $selected . '>' . $i_month . '</option>' . "\n";
             }
             ?>
@@ -31,11 +31,11 @@
         <select id="year" name="year">
             <option value="">Year</option>
             <?php
-            $year_start = 1900;
+            $year_start = 1940;
             $year_end = date('Y');
 
-            for ($i_year = $year_end; $i_year >= $year_start; $i_year--) {
-                $selected = isset($_GET['year']) && $_GET['year'] == $i_year ? ' selected' : '';
+            for ($i_year = $year_start; $i_year <= $year_end; $i_year++) {
+                $selected = $selected_year == $i_year ? ' selected' : '';
                 echo '<option value="' . $i_year . '"' . $selected . '>' . $i_year . '</option>' . "\n";
             }
             ?>
@@ -45,6 +45,63 @@
     </form>
 
     <?php
+    function starSign($day, $month)
+    {
+
+        $star = "";
+
+        if (($month == 3 && $day >= 21) || ($month == 4 && $day <= 19)) {
+            $star = "Aries";
+        } else if (($month == 4 && $day >= 20) || ($month == 5 && $day <= 20)) {
+            $star = "Taurus";
+        } else if (($month == 5 && $day >= 21) || ($month == 6 && $day <= 20)) {
+            $star = "Gemini";
+        } else if (($month == 6 && $day >= 21) || ($month == 7 && $day <= 22)) {
+            $star = "Cancer";
+        } else if (($month == 7 && $day >= 23) || ($month == 8 && $day <= 22)) {
+            $star = "Leo";
+        } else if (($month == 8 && $day >= 23) || ($month == 9 && $day <= 22)) {
+            $star = "Virgo";
+        } else if (($month == 9 && $day >= 23) || ($month == 10 && $day <= 22)) {
+            $star = "Libra";
+        } else if (($month == 10 && $day >= 23) || ($month == 11 && $day <= 21)) {
+            $star = "Scorpio";
+        } else if (($month == 11 && $day >= 23) || ($month == 12 && $day <= 21)) {
+            $star = "Sagittarius";
+        } else if (($month == 12 && $day >= 22) || ($month == 1 && $day <= 19)) {
+            $star = "Capricorn";
+        } else if (($month == 1 && $day >= 20) || ($month == 2 && $day <= 18)) {
+            $star = "Aquarius";
+        } else if (($month == 2 && $day >= 19) || ($month == 3 && $day <= 20)) {
+            $star = "Pisces";
+        }
+
+        return $star;
+    }
+
+
+    function chineseZodiac($year)
+    {
+        $zodiac = array(
+            "Rat",
+            "Ox",
+            "Tiger",
+            "Rabbit",
+            "Dragon",
+            "Snake",
+            "Horse",
+            "Sheep",
+            "Monkey",
+            "Rooster",
+            "Dog",
+            "Pig"
+        );
+
+        $remainder = ($year - 1900) % 12;
+        return $zodiac[$remainder];
+    }
+
+
     if ($_GET) {
         $first_name = $_GET["first_name"];
         $last_name = $_GET["last_name"];
@@ -80,8 +137,8 @@
             if ($age < 18) {
                 echo "<p style='color: red;'>You must be 18 years old or above.</p>";
             } else {
-                $starSign = getStarSign($month, $day);
-                $chineseZodiac = getChineseZodiac($year);
+                $starSign = starSign($month, $day);
+                $chineseZodiac = chineseZodiac($year);
 
                 echo "Name: " . ucwords(strtolower($first_name . " " . $last_name)) . "<br>";
                 echo "Date of Birth: " . $dob->format('Y-n-j') . "<br>";
@@ -102,57 +159,6 @@
         return $age; //print out the year
     }
 
-    function getStarSign($month, $day)
-    {
-        // Define the start dates for each star sign
-        $starSigns = array(
-            array("name" => "Capricornus", "start" => "12-22", "end" => "01-19"),
-            array("name" => "Aquarius", "start" => "01-20", "end" => "02-18"),
-            array("name" => "Pisces", "start" => "02-19", "end" => "03-20"),
-            array("name" => "Aries", "start" => "03-21", "end" => "04-19"),
-            array("name" => "Taurus", "start" => "04-20", "end" => "05-20"),
-            array("name" => "Gemini", "start" => "05-21", "end" => "06-20"),
-            array("name" => "Cancer", "start" => "06-21", "end" => "07-22"),
-            array("name" => "Leo", "start" => "07-23", "end" => "08-22"),
-            array("name" => "Virgo", "start" => "08-23", "end" => "09-22"),
-            array("name" => "Libra", "start" => "09-23", "end" => "10-22"),
-            array("name" => "Scorpius", "start" => "10-23", "end" => "11-21"),
-            array("name" => "Sagittarius", "start" => "11-22", "end" => "12-21")
-        );
-
-        // Convert the month and day to a comparable format
-        $formattedDate = $month . "-" . $day; //月份-日期
-    
-        // Find the matching star sign based on the date
-        foreach ($starSigns as $sign) {
-            if ($formattedDate >= $sign['start'] && $formattedDate <= $sign['end']) {
-                return $sign['name'];
-            }
-        }
-    }
-
-    function getChineseZodiac($year)
-    {
-        $zodiacs = array(
-            "Rat",
-            "Ox",
-            "Tiger",
-            "Rabbit",
-            "Dragon",
-            "Snake",
-            "Horse",
-            "Goat",
-            "Monkey",
-            "Rooster",
-            "Dog",
-            "Pig"
-        );
-
-        $startYear = 1900; // Start year for Chinese Zodiac cycle
-        $zodiacIndex = ($year - $startYear) % 12; //%除出来的余数，就找到是哪一个生肖
-    
-        return $zodiacs[$zodiacIndex];
-    }
     ?>
 
 </body>

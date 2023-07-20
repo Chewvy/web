@@ -7,11 +7,11 @@
         First Name: <input type="text" name="first_name"><br>
         Last Name: <input type="text" name="last_name"><br>
 
-        <select id="day" name="day">
+        <select id="day" name="day">//same name doesn't matter
             <option value="">Day</option>
             <?php
             for ($i_day = 1; $i_day <= 31; $i_day++) {
-                $selected = isset($_GET['day']) && $_GET['day'] == $i_day ? ' selected' : '';
+                $selected = $selected_day == $i_day ? ' selected' : '';
                 echo '<option value="' . $i_day . '"' . $selected . '>' . $i_day . '</option>' . "\n";
             }
             ?>
@@ -20,9 +20,9 @@
         <select id="month" name="month">
             <option value="">Month</option>
             <?php
-            $selected_month = date('n');
+            $selected_month = date('F');
             for ($i_month = 1; $i_month <= 12; $i_month++) {
-                $selected = isset($_GET['month']) && $_GET['month'] == $i_month ? ' selected' : '';
+                $selected = $selected_month == $i_month ? ' selected' : '';
                 echo '<option value="' . $i_month . '"' . $selected . '>' . $i_month . '</option>' . "\n";
             }
             ?>
@@ -31,11 +31,11 @@
         <select id="year" name="year">
             <option value="">Year</option>
             <?php
-            $year_start = 1900;
+            $year_start = 1940;
             $year_end = date('Y');
 
-            for ($i_year = $year_end; $i_year >= $year_start; $i_year--) {
-                $selected = isset($_GET['year']) && $_GET['year'] == $i_year ? ' selected' : '';
+            for ($i_year = $year_start; $i_year <= $year_end; $i_year++) {
+                $selected = $selected_year == $i_year ? ' selected' : '';
                 echo '<option value="' . $i_year . '"' . $selected . '>' . $i_year . '</option>' . "\n";
             }
             ?>
@@ -96,16 +96,25 @@
         if (empty($username)) {
             echo "<p style='color: red;'>Please enter your username.</p>";
             $valid = false;
-        } elseif (!preg_match('/^[a-zA-Z_\-][a-zA-Z0-9_\-]{6,}$/', $username)) { //!preg_match use to check the string,username is the variable that we want to check it's pattern
-            //there are 2 condition we want to check,the first character must be one of this [a-zA-Z_\-],the rest of it can be [a-zA-Z0-9_\-]
-            echo "<p style='color: red;'>Username must be at least 6 characters long, start with a letter, and only contain letters, numbers, underscores, or hyphens.</p>";
-            $valid = false; //if..elseif如过是true的话就执行一些代码，如果是false的话就执行2另一行代码
+        } elseif (strlen($username) < 6) {
+            echo "<p style='color: red;'>Username must be at least 6 characters long.</p>";
+            $valid = false;
+        } elseif (strtolower($username) == $username || strtoupper($username) == $username) {
+            echo "<p style='color: red;'>Username must have at least 1 capital and 1 small cap.</p>";
+            $valid = false;
+        } elseif (!preg_match('/[0-9]/', $username)) {
+            echo "<p style='color: red;'>Username must contain at least one number.</p>";
+            $valid = false;
+        } elseif (strpos($username, '_') === false && strpos($username, '-') === false) {
+            echo "<p style='color: red;'>Username must contain at least one underscore (_) or hyphen (-).</p>";
+            $valid = false;
         }
+
 
         if (empty($password)) {
             echo "<p style='color: red;'>Please enter your password.</p>";
             $valid = false;
-        } elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?!.*[+$()%@#])[A-Za-z\d]{8,}$/', $password)) {
+        } elseif (!strpbrk('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?!.*[+$()%@#])[A-Za-z\d]{8,}$/', $password)) {
             //^$ is to make sure it match the requirement betwween it.确保有1个小字母，1各大字母，1个号码，确认他没有+$()%@#这些符号，最后[A-Za-z\d]{8,}就是那个password里面要有这些才算valid
             echo "<p style='color: red;'>Password must be at least 8 characters long, contain at least 1 uppercase letter, 1 lowercase letter, and 1 number. Symbols like +$()% (@#) are not allowed.</p>";
             $valid = false;
@@ -122,7 +131,7 @@
         if (empty($email)) {
             echo "<p style='color: red;'>Please enter your email.</p>";
             $valid = false;
-        } elseif (!preg_match('/^(?=.*@)$/', $email)) { //use to check whether the email is valid or correct if not it will show error,like if it has @ or not
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) { //use to check whether the email is valid or correct if not it will show error,like if it has @ or not
             echo "<p style='color: red;'>Invalid email format.</p>";
             $valid = false;
         }
@@ -135,4 +144,5 @@
     ?>
 
 </body>
+
 </html>
