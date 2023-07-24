@@ -34,6 +34,35 @@ Bootstrap here -->
                 $description = htmlspecialchars(strip_tags($_POST['description']));
                 $price = htmlspecialchars(strip_tags($_POST['price']));
                 // bind the parameters
+        
+                $valid = true;
+                $error_messages = [];
+
+                if (empty($name)) {
+                    $error_messages[] = "Please enter a name.";
+                    $valid = false;
+                }
+                if (empty($description)) {
+                    $error_messages[] = "Please enter a description.";
+                    $valid = false;
+                }
+                if (empty($price)) {
+                    $error_messages[] = "Please enter a price.";
+                    $valid = false;
+                }
+                if (empty($promotion_price)) {
+                    $error_messages[] = "Please enter promotion price.";
+                    $valid = false;
+                }
+                if (empty($manufacture_date)) {
+                    $error_messages[] = "Please enter manufacture date.";
+                    $valid = false;
+                }
+                if (empty($expire_date)) {
+                    $error_messages[] = "Please enter expire date.";
+                    $valid = false;
+                }
+
                 $stmt->bindParam(':name', $name);
                 $stmt->bindParam(':description', $description);
                 $stmt->bindParam(':price', $price);
