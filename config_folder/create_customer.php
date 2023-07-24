@@ -112,25 +112,46 @@ Bootstrap here -->
             <table class='table table-hover table-responsive table-bordered'>
                 <tr>
                     <td>Username:</td>
-                    <td><input type="text" name="Username"></td>
+                    <td><input type="text" name="Username" class='form-control'></td>
                 </tr>
 
                 <tr>
                     <td>Password:</td>
                     <td>
-                        <input type="password" id="password" name="password"
-                            pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$">
+                        <input type="password" id="password" name="password" class='form-control'>
+
+                        <?php
+                        $valid = true;
+
+                        if (strlen($password) < 8) {
+                            echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
+                            $valid = false;
+                        } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
+                            echo "<p style='color: red;'>Password must have at least 1 capital and 1 small letter.</p>";
+                            $valid = false;
+                        } elseif (!preg_match('/[0-9]/', $password)) {
+                            echo "<p style='color: red;'>Password must contain at least one number.</p>";
+                            $valid = false;
+                        } elseif (preg_match('/[^a-zA-Z0-9]/', $password)) {
+                            echo "<p style='color: red;'>Password must not contain any symbols.</p>";
+                            $valid = false;
+                        }
+
+                        // Use $valid to perform further actions or validations if needed
+                        ?>
+
                     </td>
                 </tr>
 
+
                 <tr>
                     <td>First Name:</td>
-                    <td><input type="text" name="FirstName"></td>
+                    <td><input type="text" name="FirstName" class='form-control'></td>
                 </tr>
 
                 <tr>
                     <td>Last Name:</td>
-                    <td><input type="text" name="LastName"></td>
+                    <td><input type="text" name="LastName" class='form-control'></td>
                 </tr>
                 <tr>
                     <td>Gender:</td>
@@ -180,7 +201,10 @@ Bootstrap here -->
                     </td>
                 </tr>
                 <tr>
-                    <td><input type="submit" value="Submit" /></td>
+                    <td>
+                        <input type='submit' value='Save' class='btn btn-primary' />
+                        <a href='index.php' class='btn btn-danger'>Back to read products</a>
+                    </td>
                 </tr>
             </table>
         </form>
