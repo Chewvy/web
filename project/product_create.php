@@ -27,7 +27,8 @@ Bootstrap here -->
             ;
             try {
                 // insert query
-                $query = "INSERT INTO products (name, description, price, created) VALUES (:name, :description, :price, :created)";
+                $query = "INSERT INTO products SET name=:name,description=:description,price=:price,promotion_price=:promotion_price,manufacture_date=:manufacture_date,expire_date=:expire_date,created=:created";
+
                 // prepare query for execution
                 $stmt = $con->prepare($query);
                 // posted values
@@ -36,7 +37,7 @@ Bootstrap here -->
                 $price = strip_tags($_POST['price']);
                 $promotion_price = strip_tags($_POST['promotion_price']);
                 $manufacture_date = strip_tags($_POST['manufacture_date']);
-                $promotion_price = strip_tags($_POST['promotion_price']);
+                $expire_date = strip_tags($_POST['expire_date']);
                 // bind the parameters
         
                 $stmt->bindParam(':name', $name);
@@ -80,14 +81,17 @@ Bootstrap here -->
 
                 if ($price < $promotion_price) {
                     echo "<div class='alert alert-danger'>Promotion price must be cheaper than original price.</p>";
-                } else if (strtotime($manufacture_date) < strtotime($expire_date)) {
+                }
+                if (strtotime($manufacture_date) > strtotime($expire_date)) {
                     echo "<div class='alert alert-danger'>expired date must later than manufacture date.</p>";
                 }
 
-                if ($flag == true && $stmt->execute()) {
-                    echo "<div class='alert alert-success'>Record was saved.</div>";
-                } else {
-                    echo "<div class='alert alert-danger'>Unable to save record.</div>";
+                if ($flag = true) {
+                    if ($stmt->execute()) {
+                        echo "<div class='alert alert-success'>Record was saved.</div>";
+                    } else {
+                        echo "<div class='alert alert-danger'>Unable to save record.</div>";
+                    }
                 }
             }
 
