@@ -102,32 +102,27 @@
         } elseif (strtolower($username) == $username || strtoupper($username) == $username) {
             echo "<p style='color: red;'>Username must have at least 1 capital and 1 small cap.</p>";
             $valid = false;
-        } elseif (strpos($username, '_') === false && strpos($username, '-') === false) {
-            echo "<p style='color: red;'>Username must contain at least one underscore (_) or hyphen (-).</p>";
-            $valid = false;
-        }
+        } else if (substr($u_name, -1) == '-' || substr($u_name, -1) == '_') {
+            echo "<p style='color: red;'>Last character cannot be a symbol.</p>";
 
 
-        if (empty($password)) {
-            echo "<p style='color: red;'>Please enter your password.</p>";
-            $valid = false;
-        } elseif (strlen($password) < 8) {
-            echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
-            $valid = false;
-        } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
-            echo "<p style='color: red;'>Password must have at least 1 capital and 1 small letter.</p>";
-            $valid = false;
-        } elseif (!preg_match('/[0-9]/', $password)) {
-            echo "<p style='color: red;'>Password must contain at least one number.</p>";
-            $valid = false;
-        } else {
-            // No symbols allowed in the password
-            if (preg_match('/[^a-zA-Z0-9]/', $password)) {
-                echo "<p style='color: red;'>Password must not contain any symbols.</p>";
+            if (empty($password)) {
+                echo "<p style='color: red;'>Please enter your password.</p>";
+                $valid = false;
+            } elseif (strlen($password) < 8) {
+                echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
+                $valid = false;
+            } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
+                echo "<p style='color: red;'>Password must have at least 1 capital and 1 small letter.</p>";
+                $valid = false;
+            } elseif (strpbrk($password, '0123456789') == false) {
+                echo "<p style='color: red;'>Password must contain at least one number.</p>";
+                $valid = false;
+            } elseif (strpbrk($password, '+$()%@#') == true) {
+                echo "<p style='color: red;'>Password must not contain +$()%@#.</p>";
                 $valid = false;
             }
         }
-
 
         if (empty($confirm_password)) {
             echo "<p style='color: red;'>Please confirm your password.</p>";
