@@ -29,7 +29,7 @@ Bootstrap here -->
         <?php
         if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // include database connection
-            include 'database.php';
+            include 'config_folder/database.php';
             try {
                 // insert query
                 $query = "INSERT INTO customer SET username=:username,
@@ -37,91 +37,90 @@ Bootstrap here -->
                 // prepare query for execution
                 $stmt = $con->prepare($query);
                 // posted values
-                $username = $_POST['Username'];
-                $password = $_POST['password'];
-                $first_name = $_POST['FirstName'];
-                $last_name = $_POST['LastName'];
-                $gender = $_POST['gender'];
-                $day = $_POST['DateofBirth'];
-                $month = $_POST['DateofBirth'];
-                $year = $_POST['DateofBirth'];
+                $username = strip_tags($_POST['Username']);
+                $password = strip_tags($_POST['password']);
+                $first_name = strip_tags($_POST['FirstName']);
+                $last_name = strip_tags($_POST['LastName']);
+                $gender = strip_tags($_POST['gender']);
+                $day = strip_tags($_POST['DateofBirth']);
+                $month = strip_tags($_POST['DateofBirth']);
+                $year = strip_tags($_POST['DateofBirth']);
+
+                //bind parameters
+                $stmt->bindParam(':username', $username);
+                $stmt->bindParam(':password', $password);
+                $stmt->bindParam(':first_name', $first_name);
+                $stmt->bindParam(':last_name', $last_name);
+                $stmt->bindParam(':gender', $gender);
+                $stmt->bindParam(':day', $day);
+                $stmt->bindParam(':month', $month);
+                $stmt->bindParam(':year', $year);
+                $stmt->bindParam(':Account_status', $account_status);
+
+                $created = date('Y-m-d H:i:s');
+                $stmt->bindParam(':created', $created);
 
                 // validate input values
-                $valid = true;
                 $error_messages = [];
+                $flag = true;
 
                 if (empty($username)) {
                     $error_messages[] = "Please enter your username.";
-                    $valid = false;
+                    $flag = false;
                 } elseif (strlen($username) < 6) {
                     echo "<p style='color: red;'>Username must be at least 6 characters long.</p>";
-                    $valid = false;
+                    $flag = false;
                 } elseif (strtolower($username) == $username || strtoupper($username) == $username) {
                     echo "<p style='color: red;'>Username must have at least 1 capital and 1 small cap.</p>";
-                    $valid = false;
-                } else if (substr($u_name, -1) == '-' || substr($u_name, -1) == '_') {
+                    $flag = false;
+                } else if (substr($username, -1) == '-' || substr($username, -1) == '_') {
                     echo "<p style='color: red;'>Last character cannot be a symbol.</p>";
+                    $flag = false;
                 }
 
                 if (empty($password)) {
                     $error_messages[] = "Please enter your password.";
-                    $valid = false;
+                    $flag = false;
                 } elseif (strlen($password) < 8) {
                     echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
-                    $valid = false;
+                    $flag = false;
                 } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
                     echo "<p style='color: red;'>Password must have at least 1 capital and 1 small letter.</p>";
-                    $valid = false;
-                } elseif (!preg_match('/[0-9]/', $password)) {
+                    $flag = false;
+                } elseif (strpbrk($password, '0123456789') == false) {
                     echo "<p style='color: red;'>Password must contain at least one number.</p>";
-                    $valid = false;
-                } elseif (preg_match('/[^a-zA-Z0-9]/', $password)) {
-                    echo "<p style='color: red;'>Password must not contain any symbols.</p>";
-                    $valid = false;
+                    $flag = false;
+                } elseif (strpbrk($password, '+$()%@#') == true) {
+                    echo "<p style='color: red;'>Password must not contain +$()%@#.</p>";
+                    $flag = false;
                 }
+
 
                 if (empty($first_name)) {
                     $error_messages[] = "Please enter your first name.";
-                    $valid = false;
+                    $flag = false;
                 }
                 if (empty($last_name)) {
                     $error_messages[] = "Please enter your last name.";
-                    $valid = false;
+                    $flag = false;
                 }
                 if (empty($gender)) {
                     $error_messages[] = "Please select your gender.";
-                    $valid = false;
+                    $flag = false;
                 }
                 if (empty($day) || empty($month) || empty($year)) {
                     $error_messages[] = "Please select a valid date of birth.";
                     $valid = false;
                 }
-
-                if ($valid) {
-                    // bind the parameters
-                    $stmt->bindParam(':username', $username);
-                    $stmt->bindParam(':password', $password);
-                    $stmt->bindParam(':first_name', $first_name);
-                    $stmt->bindParam(':last_name', $last_name);
-                    $stmt->bindParam(':gender', $gender);
-                    $stmt->bindParam(':day', $day);
-                    $stmt->bindParam(':month', $month);
-                    $stmt->bindParam(':year', $year);
-                    $stmt->bindParam(':account_status', $account_status);
-
-                    // Set the account status to a default value
-                    $account_status = 'Active';
-
-                    // Execute the query
-                    if ($stmt->execute()) {
-                        echo "<p class='success-message'>Record was saved.</p>";
-                    } else {
-                        echo "<p class='error-message'>Unable to save record.</p>";
-                    }
+                if (empty($account_status)) {
+                    $error_message[] = "Please select an account_status.";
+                    $flag = false;
+                }
+                // Execute the query
+                if ($flag == true && $stmt->execute()) {
+                    echo "<p class='success-message'>Record was saved.</p>";
                 } else {
-                    foreach ($error_messages as $error) {
-                        echo "<p class='error-message'>$error</p>";
-                    }
+                    echo "<p class='error-message'>Unable to save record.</p>";
                 }
             } catch (PDOException $exception) {
                 die('ERROR: ' . $exception->getMessage());
@@ -198,6 +197,19 @@ Bootstrap here -->
                             }
                             ?>
                         </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Account Status:</td>
+                    <td>
+                        <input type="radio" id="active" name="active" value="active">
+                        <label for="Active">Active</label>
+
+                        <input type="radio" id="inactive" name="inactive" value="inactive">
+                        <label for="Inactive">Inactive</label>
+
+                        <input type="radio" id="pending" name="pending" value="pending">
+                        <label for="Pending">Pending</label>
                     </td>
                 </tr>
                 <tr>

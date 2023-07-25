@@ -23,16 +23,20 @@ Bootstrap here -->
 
         if ($_POST) {
             // include database connection
-            include 'database.php';
+            include 'config_folder/database.php';
+            ;
             try {
                 // insert query
                 $query = "INSERT INTO products (name, description, price, created) VALUES (:name, :description, :price, :created)";
                 // prepare query for execution
                 $stmt = $con->prepare($query);
                 // posted values
-                $name = htmlspecialchars(strip_tags($_POST['name']));
-                $description = htmlspecialchars(strip_tags($_POST['description']));
-                $price = htmlspecialchars(strip_tags($_POST['price']));
+                $name = strip_tags($_POST['name']);
+                $description = strip_tags($_POST['description']);
+                $price = strip_tags($_POST['price']);
+                $promotion_price = strip_tags($_POST['promotion_price']);
+                $manufacture_date = strip_tags($_POST['manufacture_date']);
+                $promotion_price = strip_tags($_POST['promotion_price']);
                 // bind the parameters
         
                 $stmt->bindParam(':name', $name);
@@ -40,46 +44,47 @@ Bootstrap here -->
                 $stmt->bindParam(':price', $price);
                 $stmt->bindParam(':promotion_price', $promotion_price);
                 $stmt->bindParam(':manufacture_date', $manufacture_date);
-                $stmt->bindParam(':expired_date', $expired_date);
+                $stmt->bindParam(':expire_date', $expire_date);
                 // specify when this record was inserted to the database
         
                 $created = date('Y-m-d H:i:s');
                 $stmt->bindParam(':created', $created);
 
                 // Execute the query
-                $valid = true;
-                $error_messages = [];
+                $flag = true;
 
                 if (empty($name)) {
-                    $error_messages[] = "Please enter a name.";
-                    $valid = false;
+                    echo "<div class='alert alert-danger'>Please enter a name.</div>";
+                    $flag = false;
                 }
                 if (empty($description)) {
-                    $error_messages[] = "Please enter a description.";
-                    $valid = false;
+                    echo "<div class='alert alert-danger'>Please enter a description.</div>";
+                    $flag = false;
                 }
                 if (empty($price)) {
-                    $error_messages[] = "Please enter a price.";
-                    $valid = false;
+                    echo "<div class='alert alert-danger'>Please enter a price.</div>";
+                    $flag = false;
                 }
                 if (empty($promotion_price)) {
-                    $error_messages[] = "Please enter promotion price.";
-                    $valid = false;
+                    echo "<div class='alert alert-danger'>Please enter promotion price.</div>";
+                    $flag = false;
                 }
                 if (empty($manufacture_date)) {
-                    $error_messages[] = "Please enter manufacture date.";
-                    $valid = false;
+                    echo "<div class='alert alert-danger'>Please enter manufacture date.</div>";
+                    $flag = false;
                 }
                 if (empty($expire_date)) {
-                    $error_messages[] = "Please enter expire date.";
-                    $valid = false;
+                    echo "<div class='alert alert-danger'>Please enter expire date.</div>";
+                    $flag = false;
                 }
 
                 if ($price < $promotion_price) {
-                    echo "<p style='color: red;'>Promotion price must be cheaper than original price.</p>";
-                } else if (strtotime($manufacture_date) < strtotime($expired_date)) {
-                    echo "<p style='color: red;'>expired date must later than manufacture date.</p>";
-                } else if ($stmt->execute()) {
+                    echo "<div class='alert alert-danger'>Promotion price must be cheaper than original price.</p>";
+                } else if (strtotime($manufacture_date) < strtotime($expire_date)) {
+                    echo "<div class='alert alert-danger'>expired date must later than manufacture date.</p>";
+                }
+
+                if ($flag == true && $stmt->execute()) {
                     echo "<div class='alert alert-success'>Record was saved.</div>";
                 } else {
                     echo "<div class='alert alert-danger'>Unable to save record.</div>";
@@ -94,13 +99,7 @@ Bootstrap here -->
         ?>
         <!-- html form here where the product information will be entered -->
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-            <?php
-            if (!empty($error_messages)) {
-                foreach ($error_messages as $error) {
-                    echo "<div class='alert alert-danger'>$error</div>";
-                }
-            }
-            ?>
+
             <table class='table table-hover table-responsive table-bordered'>
                 <tr>
                     <td>Name</td>
@@ -120,17 +119,17 @@ Bootstrap here -->
                 </tr>
                 <tr>
                     <td>Manufacture Date</td>
-                    <td><input type='text' name='manufacture_date' class='form-control' /></td>
+                    <td><input type='date' name='manufacture_date' class='form-control' /></td>
                 </tr>
                 <tr>
                     <td>Expired Date</td>
-                    <td><input type='text' name='expired_date' class='form-control' /></td>
+                    <td><input type='date' name='expire_date' class='form-control' /></td>
                 </tr>
                 <tr>
                     <td></td>
                     <td>
                         <input type='submit' value='Save' class='btn btn-primary' />
-                        <a href='database.php' class='btn btn-danger'>Back to read products</a>
+                        <a href='config/database.php' class='btn btn-danger'>Back to read products</a>
                     </td>
                 </tr>
             </table>
