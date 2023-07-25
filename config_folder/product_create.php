@@ -35,6 +35,18 @@ Bootstrap here -->
                 $price = htmlspecialchars(strip_tags($_POST['price']));
                 // bind the parameters
         
+                $stmt->bindParam(':name', $name);
+                $stmt->bindParam(':description', $description);
+                $stmt->bindParam(':price', $price);
+                $stmt->bindParam(':promotion_price', $promotion_price);
+                $stmt->bindParam(':manufacture_date', $manufacture_date);
+                $stmt->bindParam(':expired_date', $expired_date);
+                // specify when this record was inserted to the database
+        
+                $created = date('Y-m-d H:i:s');
+                $stmt->bindParam(':created', $created);
+
+                // Execute the query
                 $valid = true;
                 $error_messages = [];
 
@@ -63,18 +75,6 @@ Bootstrap here -->
                     $valid = false;
                 }
 
-                $stmt->bindParam(':name', $name);
-                $stmt->bindParam(':description', $description);
-                $stmt->bindParam(':price', $price);
-                $stmt->bindParam(':promotion_price', $promotion_price);
-                $stmt->bindParam(':manufacture_date', $manufacture_date);
-                $stmt->bindParam(':expired_date', $expired_date);
-                // specify when this record was inserted to the database
-        
-                $created = date('Y-m-d H:i:s');
-                $stmt->bindParam(':created', $created);
-
-                // Execute the query
                 if ($price < $promotion_price) {
                     echo "<p style='color: red;'>Promotion price must be cheaper than original price.</p>";
                 } else if (strtotime($manufacture_date) < strtotime($expired_date)) {
@@ -130,7 +130,7 @@ Bootstrap here -->
                     <td></td>
                     <td>
                         <input type='submit' value='Save' class='btn btn-primary' />
-                        <a href='index.php' class='btn btn-danger'>Back to read products</a>
+                        <a href='database.php' class='btn btn-danger'>Back to read products</a>
                     </td>
                 </tr>
             </table>

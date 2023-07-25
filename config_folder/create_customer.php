@@ -3,7 +3,6 @@
 
 <head>
 
-    <title>PDO - Create a Record - PHP CRUD Tutorial</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -54,11 +53,33 @@ Bootstrap here -->
                 if (empty($username)) {
                     $error_messages[] = "Please enter your username.";
                     $valid = false;
+                } elseif (strlen($username) < 6) {
+                    echo "<p style='color: red;'>Username must be at least 6 characters long.</p>";
+                    $valid = false;
+                } elseif (strtolower($username) == $username || strtoupper($username) == $username) {
+                    echo "<p style='color: red;'>Username must have at least 1 capital and 1 small cap.</p>";
+                    $valid = false;
+                } else if (substr($u_name, -1) == '-' || substr($u_name, -1) == '_') {
+                    echo "<p style='color: red;'>Last character cannot be a symbol.</p>";
                 }
+
                 if (empty($password)) {
                     $error_messages[] = "Please enter your password.";
                     $valid = false;
+                } elseif (strlen($password) < 8) {
+                    echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
+                    $valid = false;
+                } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
+                    echo "<p style='color: red;'>Password must have at least 1 capital and 1 small letter.</p>";
+                    $valid = false;
+                } elseif (!preg_match('/[0-9]/', $password)) {
+                    echo "<p style='color: red;'>Password must contain at least one number.</p>";
+                    $valid = false;
+                } elseif (preg_match('/[^a-zA-Z0-9]/', $password)) {
+                    echo "<p style='color: red;'>Password must not contain any symbols.</p>";
+                    $valid = false;
                 }
+
                 if (empty($first_name)) {
                     $error_messages[] = "Please enter your first name.";
                     $valid = false;
@@ -119,27 +140,6 @@ Bootstrap here -->
                     <td>Password:</td>
                     <td>
                         <input type="password" id="password" name="password" class='form-control'>
-
-                        <?php
-                        $valid = true;
-
-                        if (strlen($password) < 8) {
-                            echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
-                            $valid = false;
-                        } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
-                            echo "<p style='color: red;'>Password must have at least 1 capital and 1 small letter.</p>";
-                            $valid = false;
-                        } elseif (!preg_match('/[0-9]/', $password)) {
-                            echo "<p style='color: red;'>Password must contain at least one number.</p>";
-                            $valid = false;
-                        } elseif (preg_match('/[^a-zA-Z0-9]/', $password)) {
-                            echo "<p style='color: red;'>Password must not contain any symbols.</p>";
-                            $valid = false;
-                        }
-
-                        // Use $valid to perform further actions or validations if needed
-                        ?>
-
                     </td>
                 </tr>
 
@@ -203,7 +203,7 @@ Bootstrap here -->
                 <tr>
                     <td>
                         <input type='submit' value='Save' class='btn btn-primary' />
-                        <a href='index.php' class='btn btn-danger'>Back to read products</a>
+                        <a href='database.php' class='btn btn-danger'>Back to read products</a>
                     </td>
                 </tr>
             </table>
