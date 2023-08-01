@@ -36,8 +36,9 @@
                 $last_name = strip_tags(ucwords(strtolower($_POST['last_name'])));
 
                 $gender = isset($_POST['gender']) ? $_POST['gender'] : "";
-                $account_status = isset($_POST['account_status']) ? $_POST['account_status'] : "";
                 $DOB = $_POST['DOB'];
+                $account_status = isset($_POST['account_status']) ? $_POST['account_status'] : "";
+
 
                 // bind the parameters
                 $stmt->bindParam(':username', $username);
@@ -99,13 +100,11 @@
                     $flag = false;
                 }
 
-                if ($flag === true) { // Use === instead of =
+                if ($flag = true) {
                     if ($stmt->execute()) {
                         echo "<div class='alert alert-success'>Record was saved.</div>";
                     } else {
                         echo "<div class='alert alert-danger'>Unable to save record.</div>";
-                        // Uncomment the line below for debugging purposes to see the error message from the database
-                        // echo "<div class='alert alert-danger'>Error: " . $stmt->errorInfo()[2] . "</div>";
                     }
                 }
             }
@@ -179,6 +178,7 @@
                     </td>
                 </tr>
                 <tr>
+                    <td></td>
                     <td>
                         <input type='submit' value='Save' class='btn btn-primary' />
                         <a href='customer_index.php' class='btn btn-danger'>Back to read products</a>
