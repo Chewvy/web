@@ -27,7 +27,7 @@
         // read current record's data
         try {
             // prepare select query
-            $query = "SELECT username, password, first_name, last_name,gender FROM customer WHERE usename = ?";
+            $query = "SELECT username, password, first_name, last_name,gender,DOB,account_status FROM customer WHERE usename = ?";
             $stmt = $con->prepare($query);
 
             // this is the first question mark
@@ -103,6 +103,12 @@
                 <td>account_status</td>
                 <td>
                     <?php echo htmlspecialchars($account_status, ENT_QUOTES); ?>
+                </td>
+            </tr>
+            <tr>
+                <td>registration_date_and_time</td>
+                <td>
+                    <?php echo htmlspecialchars($registration_date_and_time, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>

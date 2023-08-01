@@ -24,7 +24,7 @@
         // delete message prompt will be here
         
         // select all data
-        $query = "SELECT username, password, first_name, last_name, gender, DOB, account_status FROM customer ORDER BY username DESC";
+        $query = "SELECT username, password, first_name, last_name, gender, DOB, account_status,registration_date_and_time FROM customer ORDER BY username DESC";
         $stmt = $con->prepare($query);
         $stmt->execute();
 
@@ -48,6 +48,7 @@
             echo "<th>Gender</th>";
             echo "<th>Date of Birth</th>";
             echo "<th>Account Status</th>";
+            echo "<th>Registration Date and Time</th>";
             echo "<th>Actions</th>";
             echo "</tr>";
 
@@ -64,6 +65,7 @@
                 echo "<td>{$gender}</td>";
                 echo "<td>{$DOB}</td>";
                 echo "<td>{$account_status}</td>";
+                echo "<td>{$registration_date_and_time}</td>";
                 echo "<td>";
                 // read one record
                 echo "<a href='read_one.php?id={$username}' class='btn btn-info m-r-1em'>Read</a>";
