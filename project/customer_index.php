@@ -68,7 +68,7 @@
                 echo "<td>{$registration_date_and_time}</td>";
                 echo "<td>";
                 // read one record
-                echo "<a href='read_one.php?id={$username}' class='btn btn-info m-r-1em'>Read</a>";
+                echo "<a href='customer_read_one.php?id={$username}' class='btn btn-info m-r-1em'>Read</a>";
 
                 // we will use this links on the next part of this post
                 echo "<a href='update.php?id={$username}' class='btn btn-primary m-r-1em'>Edit</a>";
