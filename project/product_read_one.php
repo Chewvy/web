@@ -27,8 +27,12 @@
         // read current record's data
         try {
             // prepare select query
-            $query = "SELECT id, name, description, price FROM products WHERE id = ?";
+            $query = "SELECT p.id, p.name, p.description, p.categoryID, c.category_name, p.price 
+                  FROM products p
+                  LEFT JOIN product_category c ON p.categoryID = c.categoryID
+                  ORDER BY p.id ASC";
             $stmt = $con->prepare($query);
+            $stmt->execute();
 
             // this is the first question mark
             $stmt->bindParam(1, $id);
@@ -48,6 +52,7 @@
             $name = $row['name'];
             $description = $row['description'];
             $price = $row['price'];
+            $category_name = $row['category_name'];
         }
 
         // show error
@@ -69,6 +74,13 @@
                 <td>Description</td>
                 <td>
                     <?php echo htmlspecialchars($description, ENT_QUOTES); ?>
+                </td>
+            </tr>
+            <tr>
+            <tr>
+                <td>Category</td>
+                <td>
+                    <?php echo htmlspecialchars($category_name, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
