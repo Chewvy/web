@@ -99,9 +99,9 @@ Bootstrap here -->
                             <?php
                             while ($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
                                 extract($row);
-                                $selected = '';
+                                $selected = ''; //$selected is an empty string
                                 if (isset($_POST['categoryID']) && $categoryID == $_POST['categoryID']) {
-                                    $selected = 'selected';
+                                    $selected = 'selected'; //if user selected the category, it will display at the selected option when user submitted the form and selected option will stay at there
                                 }
                                 echo "<option value='$categoryID' $selected>$category_name</option>";
                             }
