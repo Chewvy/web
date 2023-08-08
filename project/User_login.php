@@ -46,14 +46,6 @@
                 } elseif (strlen($password) < 8) {
                     echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
                     $flag = false;
-                }
-
-                if (empty($password)) {
-                    echo "<p style='color: red;'>Please enter your password.</p>";
-                    $flag = false;
-                } elseif (strlen($password) < 8) {
-                    echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
-                    $flag = false;
                 } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
                     echo "<p style='color: red;'>Password must have at least 1 capital and 1 small letter.</p>";
                     $flag = false;
