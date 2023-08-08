@@ -17,14 +17,33 @@
             <h1>Read Customers</h1>
         </div>
 
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get">
+            <?php echo "<a href='create_customer.php' class='btn btn-primary m-b-1em'>Create New Customer</a>"; ?>
+            <input type='search' name="search">
+            <input type='submit' value='Search' class='btn btn-primary m-r-1em'>
+        </form>
+
         <?php
         // include database connection
         include 'config_folder/database.php';
 
+        $query = "SELECT username, password, first_name, last_name, gender, DOB, account_status,registration_date_and_time FROM customer ORDER BY username ASC";
+
         // delete message prompt will be here
         
         // select all data
-        $query = "SELECT username, password, first_name, last_name, gender, DOB, account_status,registration_date_and_time FROM customer ORDER BY username DESC";
+        if ($_GET) {
+            $search = $_GET['search'];
+
+            if (empty($search)) { //才知道里面是不是空的，所以才在这里check
+                echo "<div class='alert alert-danger'>Search by Keyword</div>";
+            }
+
+            $query = "SELECT username, password, first_name, last_name, gender, DOB, account_status,registration_date_and_time  FROM customer WHERE 
+            username LIKE '%$search%'
+            ORDER BY username ASC";
+        }
+
         $stmt = $con->prepare($query);
         $stmt->execute();
 
@@ -32,7 +51,7 @@
         $num = $stmt->rowCount();
 
         // link to create record form
-        echo "<a href='create_customer.php' class='btn btn-primary m-b-1em'>Create New Customer</a>";
+        
 
         // check if more than 0 record found
         if ($num > 0) {

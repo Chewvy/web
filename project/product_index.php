@@ -18,35 +18,35 @@
         </div>
 
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get">
+            <?php echo "<a href='create_customer.php' class='btn btn-primary m-b-1em'>Create New Product</a>"; ?>
             <input type='search' name="search">
-            <input type='submit' value='Search' class='btn btn-danger'>
+            <input type='submit' value='Search' class='btn btn-primary m-r-1em'>
         </form>
 
         <?php
         // include database connection
         include 'config_folder/database.php';
+        $query = "SELECT id, name, categoryID, description, price FROM products ORDER BY id ASC";
 
         // delete message prompt will be here
         
         // select data from products and join with product_category on categoryID
-        if ($_GET) {
+        if ($_GET) { //拿到value先
             $search = $_GET['search'];
+
+            if (empty($search)) { //才知道里面是不是空的，所以才在这里check
+                echo "<div class='alert alert-danger'>Search by Keyword</div>";
+            }
 
             $query = "SELECT id, name, categoryID, description, price FROM products WHERE 
             name LIKE '%$search%'
             ORDER BY id ASC";
-        } else {
-            $query = "SELECT id, name, categoryID, description, price FROM products ORDER BY id ASC";
         }
-
         $stmt = $con->prepare($query);
         $stmt->execute();
 
         // this is how to get the number of rows returned
         $num = $stmt->rowCount();
-
-        // link to create record form
-        echo "<a href='create_product.php' class='btn btn-primary m-b-1em'>Create New Product</a>";
 
         // check if more than 0 record found
         if ($num > 0) {
