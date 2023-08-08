@@ -17,6 +17,11 @@
             <h1>Read Products</h1>
         </div>
 
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get">
+            <input type='search' name="search">
+            <input type='submit' value='Search' class='btn btn-danger'>
+        </form>
+
         <?php
         // include database connection
         include 'config_folder/database.php';
@@ -24,10 +29,16 @@
         // delete message prompt will be here
         
         // select data from products and join with product_category on categoryID
-        $query = "SELECT p.id, p.name, p.description, p.categoryID, c.category_name, p.price 
-                  FROM products p
-                  LEFT JOIN product_category c ON p.categoryID = c.categoryID
-                  ORDER BY p.id ASC";
+        if ($_GET) {
+            $search = $_GET['search'];
+
+            $query = "SELECT id, name, categoryID, description, price FROM products WHERE 
+            name LIKE '%$search%'
+            ORDER BY id ASC";
+        } else {
+            $query = "SELECT id, name, categoryID, description, price FROM products ORDER BY id ASC";
+        }
+
         $stmt = $con->prepare($query);
         $stmt->execute();
 
@@ -60,7 +71,7 @@
                 echo "<td>{$id}</td>";
                 echo "<td>{$name}</td>";
                 echo "<td>{$description}</td>";
-                echo "<td>{$category_name}</td>"; // Add this line to display the Category value
+                echo "<td>{$categoryID}</td>"; // Add this line to display the Category value
                 echo "<td>{$price}</td>";
                 echo "<td>";
                 // read one record
