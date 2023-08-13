@@ -8,6 +8,10 @@
     <!-- Latest compiled and minified Bootstrap CSS -->
 </head>
 
+<?php
+include 'navbar.php';
+?>
+
 <body>
 
     <!-- container -->

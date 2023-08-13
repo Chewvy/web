@@ -10,6 +10,10 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 
+<?php
+include 'navbar.php';
+?>
+
 <body>
     <!-- container -->
     <div class="container">
@@ -17,10 +21,11 @@
             <h1>Read Products</h1>
         </div>
 
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get">
-            <?php echo "<a href='create_customer.php' class='btn btn-primary m-b-1em'>Create New Product</a>"; ?>
-            <input type='search' name="search">
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get" class="d-flex">
+            <?php echo "<a href='create_product.php' class='btn btn-primary m-b-1em'>Create New Product</a>"; ?>
+            <input type='search' name="search" class="ml-auto"> <!-- Use ml-auto to push to the right -->
             <input type='submit' value='Search' class='btn btn-primary m-r-1em'>
+
         </form>
 
         <?php

@@ -1,3 +1,7 @@
+<?php
+include 'session.php';
+?>
+
 <!DOCTYPE HTML>
 <html>
 
@@ -12,6 +16,10 @@
 Bootstrap here -->
 </head>
 
+<?php
+include 'navbar.php';
+?>
+
 <body>
     <!-- container -->
     <div class="container">
@@ -22,6 +30,11 @@ Bootstrap here -->
         <?php
 
         if ($_POST) {
+            // Start the session
+            session_start();
+
+            include 'session.php'; // Include session handling
+        
             // include database connection
             include 'config_folder/database.php';
             ;
