@@ -19,41 +19,50 @@
         <?php
         include 'config_folder/database.php'; // Make sure the database connection is included
         
+        try {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $username = $_POST['username'];
+                $email = $_POST['email']; // Corrected variable name
+                $password = $_POST['password'];
 
-        if ($_POST) {
-            try {
-                $username = $_POST['username']; //use to check username in database and username that type by user
-                $password = $_POST['password']; //use to check password in database and password that type by user
-        
-                $query = "SELECT * FROM customer WHERE username = ? AND password = ?"; //check for this 2 thing from the table that user typed in
+                $query = "SELECT * FROM customer WHERE username = ? AND password = ? AND email = ?";
                 $stmt = $con->prepare($query);
-                $stmt->bindParam(1, $username); //use to bind value
-                $stmt->bindParam(2, $password); //use to bind value
-        
+                $stmt->bindParam(1, $username);
+                $stmt->bindParam(2, $password);
+                $stmt->bindParam(3, $email);
+
                 $flag = true;
 
                 if (empty($username)) {
                     echo "<div class='alert alert-danger'>Please enter the username</div>";
                     $flag = false;
                 } elseif (strlen($username) < 6) {
-                    echo "<p style='color: red;'>Username must be at least 6 characters long.</p>";
+                    echo "<div class='alert alert-danger'>Username must be at least 6 characters long.</div>";
                     $flag = false;
                 }
 
                 if (empty($password)) {
-                    echo "<p style='color: red;'>Please enter your password.</p>";
+                    echo "<div class='alert alert-danger'>Please enter your password.</div>";
                     $flag = false;
                 } elseif (strlen($password) < 8) {
-                    echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
+                    echo "<div class='alert alert-danger'>Password must be at least 8 characters long.</div>";
                     $flag = false;
                 } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
-                    echo "<p style='color: red;'>Password must have at least 1 capital and 1 small letter.</p>";
+                    echo "<div class='alert alert-danger'>Password must have at least 1 capital and 1 small letter.</div>";
                     $flag = false;
                 } elseif (strpbrk($password, '0123456789') == false) {
-                    echo "<p style='color: red;'>Password must contain at least one number.</p>";
+                    echo "<div class='alert alert-danger'>Password must contain at least one number.</div>";
                     $flag = false;
                 } elseif (strpbrk($password, '+$()%@#') == true) {
-                    echo "<p style='color: red;'>Password must not contain +$()%@#.</p>";
+                    echo "<div class='alert alert-danger'>Password must not contain +$()%@#.</div>";
+                    $flag = false;
+                }
+
+                if (empty($email)) {
+                    echo "<div class='alert alert-danger'>Please enter your email.</div>";
+                    $flag = false;
+                } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    echo "<div class='alert alert-danger'>Invalid email format.</div>";
                     $flag = false;
                 }
 
@@ -62,30 +71,24 @@
                     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
                     if ($result) {
-                        // Username exists in the database, so check the password.
-                        if ($password == $result['password']) {
-                            $account_status = $result['account_status'];
-                            if ($account_status == 'active') {
-                                echo "<div class='alert alert-success'>Successfully logged in!</div>";
-                                header("Location: dashboard.php");
-                            } elseif ($account_status == 'inactive') {
-                                echo "<div class='alert alert-danger'>Your account is inactive.</div>";
-                            } else {
-                                echo "<div class='alert alert-danger'>Your account is pending approval.</div>";
-                            }
+                        $account_status = $result['account_status'];
+                        if ($account_status == 'active') {
+                            echo "<div class='alert alert-success'>Successfully logged in!</div>";
+                            header("Location: dashboard.php");
+                        } elseif ($account_status == 'inactive') {
+                            echo "<div class='alert alert-danger'>Your account is inactive.</div>";
+                        } elseif ($account_status == 'pending') {
+                            echo "<div class='alert alert-warning'>Your account is pending approval.</div>";
                         } else {
-                            // Incorrect password.
                             echo "<div class='alert alert-danger'>Incorrect password.</div>";
                         }
                     } else {
-                        // Username not found in the database.
                         echo "<div class='alert alert-danger'>Username not found.</div>";
                     }
-
                 }
-            } catch (PDOException $exception) {
-                die('ERROR: ' . $exception->getMessage());
             }
+        } catch (PDOException $exception) {
+            die('ERROR: ' . $exception->getMessage());
         }
         ?>
 
@@ -94,6 +97,10 @@
                 <tr>
                     <td>Username:</td>
                     <td><input type="text" id="username" name="username" class='form-control'></td>
+                </tr>
+                <tr>
+                    <td>Email:</td>
+                    <td><input type="text" id="email" name="email" class='form-control'></td>
                 </tr>
                 <tr>
                     <td>Password:</td>
