@@ -12,6 +12,11 @@
 Bootstrap here -->
 </head>
 
+
+<?php
+include 'navbar.php';
+?>
+
 <body>
     <!-- container -->
     <div class="container">

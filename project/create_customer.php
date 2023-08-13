@@ -19,11 +19,13 @@
         <?php
         if ($_POST) {
             include 'config_folder/database.php';
+
             try {
-                $query = "INSERT INTO customer SET username=:username, password=:password, first_name=:first_name, last_name=:last_name, gender=:gender, DOB=:DOB, account_status=:account_status, registration_date_and_time=:registration_date_and_time";
+                $query = "INSERT INTO customer SET username=:username, email=:email,password=:password, first_name=:first_name, last_name=:last_name, gender=:gender, DOB=:DOB, account_status=:account_status, registration_date_and_time=:registration_date_and_time";
                 $stmt = $con->prepare($query);
 
                 $username = strip_tags(ucwords(strtolower($_POST['username'])));
+                $email = strip_tags(ucwords(strtolower($_POST['email'])));
                 $password = strip_tags($_POST['password']);
                 $confirm_password = strip_tags($_POST['confirm_password']);
                 $first_name = strip_tags(ucwords(strtolower($_POST['first_name'])));
@@ -33,6 +35,7 @@
                 $account_status = isset($_POST['account_status']) ? $_POST['account_status'] : "";
 
                 $stmt->bindParam(':username', $username);
+                $stmt->bindParam(':email', $email);
                 $stmt->bindParam(':password', $password);
                 $stmt->bindParam(':first_name', $first_name);
                 $stmt->bindParam(':last_name', $last_name);
@@ -49,24 +52,32 @@
                     echo "<div class='alert alert-danger'>Please enter the username</div>";
                     $flag = false;
                 } elseif (strlen($username) < 6) {
-                    echo "<p style='color: red;'>Username must be at least 6 characters long.</p>";
+                    echo "<div class='alert alert-danger'>Username must be at least 6 characters long.</div>";
+                    $valid = false;
+                }
+
+                if (empty($email)) {
+                    echo "<div class='alert alert-danger'>Please enter your email.</div>";
+                    $valid = false;
+                } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) { //use to check whether the email is valid or correct if not it will show error,like if it has @ or not
+                    echo "<div class='alert alert-danger'>Invalid email format.</div>";
                     $valid = false;
                 }
 
                 if (empty($password)) {
-                    echo "<p style='color: red;'>Please enter your password.</p>";
+                    echo "<div class='alert alert-danger'>Please enter your password.</div>";
                     $flag = false;
                 } elseif (strlen($password) < 8) {
-                    echo "<p style='color: red;'>Password must be at least 8 characters long.</p>";
+                    echo "<div class='alert alert-danger'>Password must be at least 8 characters long.</div>";
                     $flag = false;
                 } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
-                    echo "<p style='color: red;'>Password must have at least 1 capital and 1 small letter.</p>";
+                    echo "<div class='alert alert-danger'>Password must have at least 1 capital and 1 small letter.</div>";
                     $flag = false;
                 } elseif (strpbrk($password, '0123456789') == false) {
-                    echo "<p style='color: red;'>Password must contain at least one number.</p>";
+                    echo "<div class='alert alert-danger'>Password must contain at least one number.</div>";
                     $flag = false;
                 } elseif (strpbrk($password, '+$()%@#') == true) {
-                    echo "<p style='color: red;'>Password must not contain +$()%@#.</p>";
+                    echo "<div class='alert alert-danger'>Password must not contain +$()%@#.</div>";
                     $flag = false;
                 }
 
@@ -113,6 +124,7 @@
             } catch (PDOException $exception) {
                 die('ERROR: ' . $exception->getMessage());
             }
+
         }
         ?>
 
@@ -121,6 +133,10 @@
                 <tr>
                     <td>Username:</td>
                     <td><input type="text" id="username" name="username" class='form-control'></td>
+                </tr>
+                <tr>
+                    <td>Email:</td>
+                    <td><input type="text" id="email" name="email" class='form-control'></td>
                 </tr>
                 <tr>
                     <td>Password:</td>
