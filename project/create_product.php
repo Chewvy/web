@@ -61,9 +61,37 @@ include 'navbar.php';
                 // Execute the query
                 $flag = true;
 
-                // ... (rest of the validation code remains the same)
-        
-                if ($flag === true) { // Use triple equals for comparison
+                if (empty($name)) {
+                    echo "<div class='alert alert-danger'>Please enter the username</div>";
+                    $flag = false;
+                }
+                if (empty($description)) {
+                    echo "<div class='alert alert-danger'>Please enter a description</div>";
+                    $flag = false;
+                }
+                if (empty($categoryID)) {
+                    echo "<div class='alert alert-danger'>Please select a category</div>";
+                    $flag = false;
+                }
+                if (empty($price)) {
+                    echo "<div class='alert alert-danger'>Please type a price</div>";
+                    $flag = false;
+                }
+                if (empty($promotion_price)) {
+                    echo "<div class='alert alert-danger'>Please type a promotion price</div>";
+                    $flag = false;
+                } else if ($promotion_price >= $price) {
+                    echo "<div class='alert alert-danger'>Promotion price must be lower than original price</div>";
+                    $flag = false;
+                }
+                if (empty($manufacture_date)) {
+                    echo "<div class='alert alert-danger'>Please select a manufacture date</div>";
+                    $flag = false;
+                } else if ($manufacture_date > $expire_date) {
+                    echo "<div class='alert alert-danger'>Manufacture date must be earlier than expire date</div>";
+                    $flag = false;
+                }
+                if ($flag) { // No need to use === true, just use $flag directly
                     if ($stmt->execute()) {
                         echo "<div class='alert alert-success'>Record was saved.</div>";
                     } else {
@@ -97,17 +125,13 @@ include 'navbar.php';
                 <tr>
                     <td>Category</td>
                     <td>
-                        <select class="form-select" aria-label="Default select example" name="categoryID"
-                            id="categoryID">
+                        <select class="form-select" aria-label="Default select example" name="categoryID" id="category">
                             <option value="">Select Category</option>
 
                             <?php
                             while ($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
                                 extract($row);
-                                $selected = ''; //$selected is an empty string
-                                if (isset($_POST['categoryID']) && $categoryID == $_POST['categoryID']) {
-                                    $selected = 'selected'; //if user selected the category, it will display at the selected option when user submitted the form and selected option will stay at there
-                                }
+                                $selected = isset($_POST['categoryID']) && $_POST['categoryID'] == $categoryID ? 'selected' : '';
                                 echo "<option value='$categoryID' $selected>$category_name</option>";
                             }
                             ?>
