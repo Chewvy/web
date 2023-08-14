@@ -1,5 +1,5 @@
 <?php
-include 'session.php';
+session_start();
 ?>
 
 <!DOCTYPE HTML>
@@ -30,11 +30,6 @@ include 'navbar.php';
         <?php
 
         if ($_POST) {
-            // Start the session
-            session_start();
-
-            include 'session.php'; // Include session handling
-        
             // include database connection
             include 'config_folder/database.php';
             ;
