@@ -53,11 +53,8 @@ include 'navbar.php';
 
                     // Validate product selections
                     $product_1_id = $_POST['product_1_id']; //match the selected item with the variables
-                    $product_1_quantity = $_POST['product_1_quantity']; //match the selected item with the variables
                     $product_2_id = $_POST['product_2_id'];
-                    $product_2_quantity = $_POST['product_2_quantity'];
                     $product_3_id = $_POST['product_3_id'];
-                    $product_3_quantity = $_POST['product_3_quantity'];
 
                     if (empty($username)) {
                         echo "<div class='alert alert-danger'>Please enter the username</div>";
@@ -68,24 +65,20 @@ include 'navbar.php';
                             $order_id = $con->lastInsertId();
 
                             // Insert query for ORDER DETAILS
-                            $orderDetailQuery = "INSERT INTO order_details SET order_id=:order_id, product_id=:product_id, quantity=:quantity";
+                            $orderDetailQuery = "INSERT INTO order_details SET order_id=:order_id, product_id=:product_id";
                             $orderDetailStmt = $con->prepare($orderDetailQuery);
 
                             $orderDetailStmt->bindParam(':order_id', $order_id);
                             $orderDetailStmt->bindParam(':product_id', $product_id);
-                            $orderDetailStmt->bindParam(':quantity', $quantity);
 
                             // Insert the selected product IDs and quantities into order_details table
                             $orderDetailStmt->bindParam(':product_id', $product_1_id);
-                            $orderDetailStmt->bindParam(':quantity', $product_1_quantity);
                             $orderDetailStmt->execute();
 
                             $orderDetailStmt->bindParam(':product_id', $product_2_id);
-                            $orderDetailStmt->bindParam(':quantity', $product_2_quantity);
                             $orderDetailStmt->execute();
 
                             $orderDetailStmt->bindParam(':product_id', $product_3_id);
-                            $orderDetailStmt->bindParam(':quantity', $product_3_quantity);
                             $orderDetailStmt->execute();
 
                             echo "<div class='alert alert-success'>Order placed successfully.</div>";
@@ -131,8 +124,6 @@ include 'navbar.php';
                             ?>
                         </select>
                     </td>
-                    <td>Quantity:</td>
-                    <td><input type="number" name="product_1_quantity" min="1" max="5"></td>
                 </tr>
                 <tr>
                     <td>Product 2:</td>
@@ -150,8 +141,6 @@ include 'navbar.php';
                             ?>
                         </select>
                     </td>
-                    <td>Quantity:</td>
-                    <td><input type="number" name="product_2_quantity" min="1" max="5"></td>
                 </tr>
                 <tr>
                     <td>Product 3:</td>
@@ -168,9 +157,6 @@ include 'navbar.php';
                             }
                             ?>
                         </select>
-                    </td>
-                    <td>Quantity:</td>
-                    <td><input type="number" name="product_3_quantity" min="1" max="5"></td>
                 </tr>
             </table>
 
