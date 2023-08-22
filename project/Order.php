@@ -27,23 +27,22 @@ include 'navbar.php';
 
         include 'config_folder/database.php';
 
-        $customer_IDEr = $customer_ID = "";
-        $product_IDEr = $quantityEr = array();
-
-        // Default value for number of products
-        $selected_num_products = 3;
-
+        $customer_IDEr = $customer_ID = ""; //capable of holding text data, but it contains no actual characters
+        $product_IDEr = $quantityEr = array(); //use to hold multiple values,store a list of item
+        
+        $selected_num_products = 3; //by default
+        
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             try {
                 // Insert into order_summary
-                $summary_query = "INSERT INTO order_summary (customer_id, order_date) VALUES (:customer_id, :order_date)";
+                $summary_query = "INSERT INTO order_summary SET customer_id=:customer_id, order_date=:order_date";
                 $summary_stmt = $con->prepare($summary_query);
 
                 // Validate customer ID before inserting
                 if (!empty($customer_ID)) { //if not empty
                     $summary_stmt->bindParam(':customer_id', $customer_ID);
-                    $order_date = date('Y-m-d H:i:s');
                     $summary_stmt->bindParam(':order_date', $order_date);
+                    $order_date = date('Y-m-d H:i:s');
                     $summary_stmt->execute();
                 }
 
@@ -68,32 +67,21 @@ include 'navbar.php';
                     }
                 }
 
-                $productID_array = array_unique($_POST["product_ID"]); // removes duplicate values from an array,If two or more array values are the same, the first appearance will be kept and the other will be removed.如果有重复的，会保留第一个的然后无视掉第二个重复的
+                $productID_array = array_unique($_POST["product_ID"]); //如果有重复的，会保留第一个的然后无视掉第二个重复的
         
-                // Update the selected_num_products variable if the form was submitted
                 if (isset($_POST['selected_num_products'])) {
                     $selected_num_products = intval($_POST['selected_num_products']);
-                    //when user selected the number of product form after they submitted it will show extra the form for them to insert the product当他们选了一个号码，就会出多少个form
-                    //first we check whether the user have selected a number and make sure it is a number not other value
+                    //t当他们选了一个号码，就会出多少个form
         
-                    // Define default values for selected products and quantities
-                    $selected_products = []; // An array to store the selected product IDs
-                    $selected_quantities = []; // An array to store the quantities corresponding to selected products
-                    //then we define 2 array one is selected product and 1 is selected quantity
-        
-
-                    if (isset($_POST['selected_num_products'])) {
-                        $selected_num_products = intval($_POST['selected_num_products']);
-                        //when user selected the number of product form after they submitted it will show extra the form for them to insert the product当他们选了一个号码，就会出多少个form
-        
-                        // Initialize arrays with empty values for each product slot
-                        for ($i = 0; $i < $selected_num_products; $i++) {
-                            $selected_products[] = "";
-                            $selected_quantities[] = "";
-                            //Then if the above requirement have met then it will show the number of form that they want
-                        }
+                    // Initialize arrays with empty values for each product slot
+                    for ($i = 0; $i < $selected_num_products; $i++) {
+                        $selected_products[] = "";
+                        $selected_quantities[] = "";
                     }
+                } else {
+                    $selected_num_products = 3; //back to default
                 }
+
 
                 for ($k = 0; $k < count($_POST["product_ID"]); $k++) {
                     $product_IDEr[$k] = ""; //assuming by default is empty
@@ -108,17 +96,6 @@ include 'navbar.php';
                         $product_IDEr[$k] = "Please select different product.";
                         $flag = false;
                         //如果是重复的话就会出error message
-                    }
-
-                    $quantityEr[$k] = "";
-
-                    for ($k = 0; $k < $selected_num_products; $k++) {
-                        $quantityEr[$k] = "";
-
-                        if ($selected_products[$k] == "" || $selected_quantities[$k] == "" || $selected_quantities[$k] < 1) {
-                            $quantityEr[$k] = "Please fill in a valid quantity greater than zero.";
-                            $flag = false;
-                        }
                     }
                 }
 
@@ -138,12 +115,6 @@ include 'navbar.php';
                     }
                 }
 
-                // Use $non_empty_rows to create orders
-                // Validate quantity values
-                $selected_num_products = intval($_POST['selected_num_products']);
-                $selected_products = $_POST["product_ID"];
-                $selected_quantities = $_POST["quantity"];
-
                 for ($k = 0; $k < $selected_num_products; $k++) {
                     $quantityEr[$k] = "";
 
@@ -151,7 +122,7 @@ include 'navbar.php';
                         // Valid quantity values, proceed with insertion
                         try {
                             // Insert the order item into the database
-                            $insert_order_item_query = "INSERT INTO order_details (order_id, product_id, quantity) VALUES (:order_id, :product_id, :quantity)";
+                            $insert_order_item_query = "INSERT INTO order_details SET order_id=:order_id, product_id=:product_id, quantity=:quantity";
                             $insert_order_item_stmt = $con->prepare($insert_order_item_query);
                             $insert_order_item_stmt->bindParam(':order_id', $order_summary_id);
                             $insert_order_item_stmt->bindParam(':product_id', $selected_products[$k]);
@@ -175,7 +146,6 @@ include 'navbar.php';
             }
         } else {
             // Default values for initial product rows
-            $selected_num_products = 3; // Assuming you want to start with one product initially
             $selected_products = []; // Initialize an empty array for selected product IDs
             $selected_quantities = []; // Initialize an empty array for selected quantities
         
@@ -233,7 +203,7 @@ include 'navbar.php';
 
                 <tr>
                     <td>Number of Products</td>
-                    <td colspan="10">
+                    <td colspan="3">
                         <select class="form-select" name="selected_num_products" id="selected_num_products">
                             <?php
                             for ($num = 1; $num <= 10; $num++) {
@@ -262,6 +232,7 @@ include 'navbar.php';
                         <td>Product
                             <?php echo $productIndex + 1 ?>
                         </td>
+
                         <td>
                             <select class="form-select" name="product_ID[]">
                                 <option value="">Select product</option>
