@@ -27,32 +27,32 @@ include 'navbar.php';
 
         include 'config_folder/database.php';
 
-        $customer_IDEr = $customer_ID = ""; //capable of holding text data, but it contains no actual characters
+        $customer_IDEr = $customer_Id = ""; //capable of holding text data, but it contains no actual characters
         $product_IDEr = $quantityEr = array(); //use to hold multiple values,store a list of item
         
         $selected_num_products = 3; //by default
         
-        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        if (isset($_POST['Submit_Order'])) {
             try {
                 // Insert into order_summary
-                $summary_query = "INSERT INTO order_summary SET customer_id=:customer_id, order_date=:order_date";
+                $summary_query = "INSERT INTO order_summary (customer_id, order_date) VALUES (:customer_id, :order_date)";
                 $summary_stmt = $con->prepare($summary_query);
 
                 // Validate customer ID before inserting
-                if (!empty($customer_ID)) { //if not empty
-                    $summary_stmt->bindParam(':customer_id', $customer_ID);
+                if (!empty($customer_id)) { //if not empty
+                    $summary_stmt->bindParam(':customer_id', $customer_id);
                     $summary_stmt->bindParam(':order_date', $order_date);
                     $order_date = date('Y-m-d H:i:s');
                     $summary_stmt->execute();
                 }
 
                 // Get the inserted order summary ID
-                $order_summary_id = $con->lastInsertId();
+                $order_id = $con->lastInsertId();
 
                 $flag = true;
                 $resultFlag = false;
 
-                if ($customer_ID == "") {
+                if ($_POST["customer_id"] == "") {
                     $customer_IDEr = "Please select a customer.";
                     $flag = false;
                 }
@@ -124,7 +124,7 @@ include 'navbar.php';
                             // Insert the order item into the database
                             $insert_order_item_query = "INSERT INTO order_details SET order_id=:order_id, product_id=:product_id, quantity=:quantity";
                             $insert_order_item_stmt = $con->prepare($insert_order_item_query);
-                            $insert_order_item_stmt->bindParam(':order_id', $order_summary_id);
+                            $insert_order_item_stmt->bindParam(':order_id', $order_id); // Use the order_id obtained above
                             $insert_order_item_stmt->bindParam(':product_id', $selected_products[$k]);
                             $insert_order_item_stmt->bindParam(':quantity', $selected_quantities[$k]);
                             $insert_order_item_stmt->execute();
@@ -135,14 +135,15 @@ include 'navbar.php';
                         }
                     } else {
                         $flag = false; // Set the flag to false if invalid quantities are found
+                        $quantityEr[$k] = "Invalid quantity.";
                     }
                 }
 
                 if ($flag && $resultFlag) {
                     echo "<div class='alert alert-success'>Order placed successfully.</div>";
                 }
-            } catch (PDOException $exception) {
-                die('ERROR: ' . $exception->getMessage());
+            } catch (PDOException $e) {
+                echo "Error: " . $e->getMessage();
             }
         } else {
             // Default values for initial product rows
@@ -173,33 +174,37 @@ include 'navbar.php';
             $productID_array[] = $row['id']; //add product id to current array
             $productDetails_array[] = $row; //store product information
         }
-
         ?>
 
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <table class='table table-hover table-responsive table-bordered'>
 
                 <tr>
+
                     <td>Customer</td>
-                    <td colspan="3">
+                    <td colspan=3>
                         <select class="form-select" name="customer_id" id="customer_id">
-                            <option value="">Select customer</option>
+                            <option value="">Select username</option>
                             <?php
                             while ($row = $customerStmt->fetch(PDO::FETCH_ASSOC)) {
                                 extract($row);
-                                $selected = (isset($_POST["customer_id"]) && $_POST["customer_id"] == $customer_id) ? 'selected' : '';
-                                echo "<option value='$customer_id' $selected>$username - $first_name $last_name</option>";
+                                $selected = ($customer_id == (isset($_SESSION["selectedCustomer"]) ? $_SESSION["selectedCustomer"] : '')) ? 'selected' : '';
+                                echo "<option value='$customer_id' $selected>$username ($first_name $last_name)</option>";
+                                // Assign the customer ID to the variable
+                                $customer_id = $customer_id;
                             }
+
                             ?>
                         </select>
                         <div class='text-danger'>
-                            <?php if (!empty($customer_IDEr)) {
-                                echo $customer_IDEr;
-                            } ?>
+                            <?php echo $customer_IDEr; ?>
                         </div>
-
                     </td>
+
+
+
                 </tr>
+
 
                 <tr>
                     <td>Number of Products</td>
@@ -218,7 +223,7 @@ include 'navbar.php';
                 <tr>
                     <td></td>
                     <td colspan=3>
-                        <input type='submit' value='Confirm' class='btn btn-primary' />
+                        <input type='submit' name='confirm' value='Confirm' class='btn btn-primary' />
                     </td>
                 </tr>
 
@@ -272,7 +277,7 @@ include 'navbar.php';
                 <tr>
                     <td></td>
                     <td colspan=3>
-                        <input type='submit' value='Submit Order' class='btn btn-primary' />
+                        <input type='submit' name='Submit_Order' value='Submit Order' class='btn btn-primary' />
                     </td>
                 </tr>
             </table>
