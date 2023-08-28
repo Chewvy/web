@@ -44,6 +44,9 @@
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page" href="Order.php">Order</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="Order_listing.php">Order Listing</a>
+                        </li>
                     </ul>
                     <form class="d-flex" role="search">
                         <a button class="btn btn-outline-danger" type="submit" href="User_logout">Logout</button></a>
