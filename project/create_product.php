@@ -33,12 +33,6 @@ include 'navbar.php';
 
         if ($_POST) {
             try {
-                // insert query
-                $query = "INSERT INTO products SET name=:name, description=:description, price=:price, promotion_price=:promotion_price, manufacture_date=:manufacture_date, expire_date=:expire_date, created=:created, categoryID=:categoryID";
-
-                // prepare query for execution
-                $stmt = $con->prepare($query);
-
                 // posted values
                 $name = strip_tags($_POST['name']);
                 $description = strip_tags($_POST['description']);
@@ -48,19 +42,6 @@ include 'navbar.php';
                 $expire_date = strip_tags($_POST['expire_date']);
                 $categoryID = $_POST['categoryID']; // Get categoryID from the form
         
-                // bind the parameters
-                $stmt->bindParam(':name', $name);
-                $stmt->bindParam(':description', $description);
-                $stmt->bindParam(':price', $price);
-                $stmt->bindParam(':promotion_price', $promotion_price);
-                $stmt->bindParam(':manufacture_date', $manufacture_date);
-                $stmt->bindParam(':expire_date', $expire_date);
-                $stmt->bindParam(':categoryID', $categoryID); // Bind the categoryID
-        
-                // specify when this record was inserted to the database
-                $created = date('Y-m-d H:i:s');
-                $stmt->bindParam(':created', $created);
-
                 // Execute the query
                 $flag = true;
 
@@ -80,13 +61,17 @@ include 'navbar.php';
                     echo "<div class='alert alert-danger'>Please type a price</div>";
                     $flag = false;
                 }
-                if (empty($promotion_price)) {
-                    echo "<div class='alert alert-danger'>Please type a promotion price</div>";
+                if (!empty($promotion_price)) {
+                    if (is_numeric($promotion_price))
+                        echo "<div class='alert alert-danger'>Promotion price must be number</div>";
                     $flag = false;
-                } else if ($promotion_price >= $price) {
+                } else if ($promotion_price > $price) {
                     echo "<div class='alert alert-danger'>Promotion price must be lower than original price</div>";
                     $flag = false;
+                } else {
+                    $promotion_price = 0;
                 }
+
                 if (empty($manufacture_date)) {
                     echo "<div class='alert alert-danger'>Please select a manufacture date</div>";
                     $flag = false;
@@ -95,6 +80,25 @@ include 'navbar.php';
                     $flag = false;
                 }
                 if ($flag) { // No need to use === true, just use $flag directly
+                    // insert query
+                    $query = "INSERT INTO products SET name=:name, description=:description, price=:price, promotion_price=:promotion_price, manufacture_date=:manufacture_date, expire_date=:expire_date, created=:created, categoryID=:categoryID";
+
+                    // prepare query for execution
+                    $stmt = $con->prepare($query);
+
+                    // bind the parameters
+                    $stmt->bindParam(':name', $name);
+                    $stmt->bindParam(':description', $description);
+                    $stmt->bindParam(':price', $price);
+                    $stmt->bindParam(':promotion_price', $promotion_price);
+                    $stmt->bindParam(':manufacture_date', $manufacture_date);
+                    $stmt->bindParam(':expire_date', $expire_date);
+                    $stmt->bindParam(':categoryID', $categoryID); // Bind the categoryID
+        
+                    // specify when this record was inserted to the database
+                    $created = date('Y-m-d H:i:s');
+                    $stmt->bindParam(':created', $created);
+
                     if ($stmt->execute()) {
                         echo "<div class='alert alert-success'>Record was saved.</div>";
                     } else {
