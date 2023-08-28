@@ -37,7 +37,7 @@ include 'navbar.php';
         // include database connection
         include 'config_folder/database.php';
 
-        $query = "SELECT username, email,password, first_name, last_name, gender, DOB, account_status,registration_date_and_time FROM customer ORDER BY username ASC";
+        $query = "SELECT customer_id, username, email,password, first_name, last_name, gender, DOB, account_status,registration_date_and_time FROM customer ORDER BY username ASC";
 
         // delete message prompt will be here
         
@@ -49,7 +49,8 @@ include 'navbar.php';
                 echo "<div class='alert alert-danger'>Search by Keyword</div>";
             }
 
-            $query = "SELECT username,email, password, first_name, last_name, gender, DOB, account_status,registration_date_and_time  FROM customer WHERE 
+            $query = "SELECT customer_id, username,email, password, first_name, last_name, gender, DOB, account_status,registration_date_and_time  FROM customer WHERE 
+            customer_id LIKE '%$search%';
             username LIKE '%$search%';
             first_name LIKE '%$search%';
             last_name LIKE '%$search%';
@@ -73,6 +74,7 @@ include 'navbar.php';
             echo "<table class='table table-hover table-responsive table-bordered'>";
             // creating our table heading
             echo "<tr>";
+            echo "<th>Customer ID</th>";
             echo "<th>Username</th>";
             echo "<th>Email</th>";
             echo "<th>Password</th>";
@@ -91,6 +93,7 @@ include 'navbar.php';
                 extract($row);
                 // creating new table row per record
                 echo "<tr>";
+                echo "<td>{$customer_id}</td>";
                 echo "<td>{$username}</td>";
                 echo "<td>{$email}</td>";
                 echo "<td>{$password}</td>";
@@ -105,7 +108,7 @@ include 'navbar.php';
                 echo "<a href='customer_read_one.php?id={$username}' class='btn btn-info m-r-1em'>Read</a>";
 
                 // we will use this links on the next part of this post
-                echo "<a href='update.php?id={$username}' class='btn btn-primary m-r-1em'>Edit</a>";
+                echo "<a href='customer_update.php?customer_id={$customer_id}' class='btn btn-primary m-r-1em'>Edit</a>";
 
                 // we will use this links on the next part of this post
                 echo "<a href='#' onclick='delete_user(\"{$username}\");' class='btn btn-danger'>Delete</a>";
