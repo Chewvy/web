@@ -30,13 +30,12 @@ include 'navbar.php';
             <?php echo "<a href='create_product.php' class='btn btn-primary m-b-1em'>Create New Product</a>"; ?>
             <input type='search' name="search" class="ml-auto"> <!-- Use ml-auto to push to the right -->
             <input type='submit' value='Search' class='btn btn-primary m-r-1em'>
-
         </form>
 
         <?php
         // include database connection
         include 'config_folder/database.php';
-        $query = "SELECT id, name, categoryID, description, price FROM products ORDER BY id ASC";
+        $query = "SELECT id, name, categoryID, description, price, Promotion_price, manufacture_date, expire_date FROM products ORDER BY id ASC";
 
         // delete message prompt will be here
         
@@ -71,6 +70,9 @@ include 'navbar.php';
             echo "<th>Description</th>";
             echo "<th>Category</th>"; // Add this line to include the Category column
             echo "<th>Price</th>";
+            echo "<th>Promotion Price</th>";
+            echo "<th>Manufacture Date</th>";
+            echo "<th>Expire Date</th>";
             echo "<th>Action</th>";
             echo "</tr>";
 
@@ -83,12 +85,15 @@ include 'navbar.php';
                 echo "<td>{$description}</td>";
                 echo "<td>{$categoryID}</td>"; // Add this line to display the Category value
                 echo "<td>{$price}</td>";
+                echo "<td>{$Promotion_price}</td>";
+                echo "<td>{$manufacture_date}</td>";
+                echo "<td>{$expire_date}</td>";
                 echo "<td>";
                 // read one record
                 echo "<a href='product_read_one.php?id={$id}' class='btn btn-info m-r-1em'>Read</a>";
 
                 // we will use this link on the next part of this post
-                echo "<a href='update.php?id={$id}' class='btn btn-primary m-r-1em'>Edit</a>";
+                echo "<a href='product_update.php?id={$id}' class='btn btn-primary m-r-1em'>Edit</a>";
 
                 // we will use this link on the next part of this post
                 echo "<a href='#' onclick='delete_user({$id});' class='btn btn-danger'>Delete</a>";
