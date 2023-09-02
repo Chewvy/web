@@ -1,13 +1,12 @@
 <?php
 session_start();
-
 ?>
 
 <!DOCTYPE HTML>
 <html>
 
 <head>
-    <title>PDO - Create a Record - PHP CRUD Tutorial</title>
+    <title>PDO - Read Products - PHP CRUD Tutorial</title>
     <!-- Latest compiled and minified Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -35,21 +34,22 @@ include 'navbar.php';
         <?php
         // include database connection
         include 'config_folder/database.php';
-        $query = "SELECT id, name, categoryID, description, price, Promotion_price, manufacture_date, expire_date FROM products ORDER BY id ASC";
+        $query = "SELECT p.id, p.name, p.categoryID, p.price, p.promotion_price, c.category_name,p.created 
+        FROM products p
+        INNER JOIN product_category c ON p.categoryID = c.categoryID 
+        ORDER BY id ASC";
 
-        // delete message prompt will be here
-        
         // select data from products and join with product_category on categoryID
-        if ($_GET) { //拿到value先
+        if ($_GET) { // Check if there's a search value
             $search = $_GET['search'];
 
-            if (empty($search)) { //才知道里面是不是空的，所以才在这里check
-                echo "<div class='alert alert-danger'>Search by Keyword</div>";
+            if (!empty($search)) { // Make sure search value is not empty
+                $query = "SELECT p.id, p.name, p.categoryID, p.price, p.promotion_price, c.category_name,p.created 
+                FROM products p
+                INNER JOIN product_category c ON p.categoryID = c.categoryID 
+                WHERE p.name LIKE '%$search%'
+                ORDER BY p.id ASC";
             }
-
-            $query = "SELECT id, name, categoryID, description, price FROM products WHERE 
-            name LIKE '%$search%'
-            ORDER BY id ASC";
         }
         $stmt = $con->prepare($query);
         $stmt->execute();
@@ -67,12 +67,9 @@ include 'navbar.php';
             echo "<tr>";
             echo "<th>ID</th>";
             echo "<th>Name</th>";
-            echo "<th>Description</th>";
-            echo "<th>Category</th>"; // Add this line to include the Category column
+            echo "<th>Category Name</th>";
             echo "<th>Price</th>";
-            echo "<th>Promotion Price</th>";
-            echo "<th>Manufacture Date</th>";
-            echo "<th>Expire Date</th>";
+            echo "<th>Created</th>";
             echo "<th>Action</th>";
             echo "</tr>";
 
@@ -82,12 +79,18 @@ include 'navbar.php';
                 echo "<tr>";
                 echo "<td>{$id}</td>";
                 echo "<td>{$name}</td>";
-                echo "<td>{$description}</td>";
-                echo "<td>{$categoryID}</td>"; // Add this line to display the Category value
-                echo "<td>{$price}</td>";
-                echo "<td>{$Promotion_price}</td>";
-                echo "<td>{$manufacture_date}</td>";
-                echo "<td>{$expire_date}</td>";
+                echo "<td>{$category_name}</td>"; // Add this line to display the Category value
+                
+                echo "<td>";
+                $f_price = "RM" . number_format($price, 2);
+
+                if ($promotion_price > 0) {
+                    $f_price = "<span class='text-decoration-line-through'>" . "RM" . number_format($price, 2) . "</span>" . ' ' . "RM" . number_format($promotion_price, 2);
+                }
+                echo $f_price; // Display the formatted price
+                echo "</td>";
+                echo "<td>{$created}</td>";
+
                 echo "<td>";
                 // read one record
                 echo "<a href='product_read_one.php?id={$id}' class='btn btn-info m-r-1em'>Read</a>";
@@ -104,6 +107,7 @@ include 'navbar.php';
             // end table
             echo "</table>";
         } else {
+            // if no records found
             echo "<div class='alert alert-danger'>No records found.</div>";
         }
         ?>
