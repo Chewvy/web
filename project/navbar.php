@@ -29,23 +29,17 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="create_customer.php">Create
+                            <a class="nav-link active" aria-current="page" href="customer_index.php">
                                 Customer</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="create_product.php">Create Product</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="customer_index.php">Customer Index</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="product_index.php">Product Index</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="Order.php">Order</a>
+                            <a class="nav-link active" aria-current="page" href="product_index.php">Product</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page" href="Order_listing.php">Order Listing</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="product_category.php">Create Category</a>
                         </li>
                     </ul>
                     <form class="d-flex" role="search">
