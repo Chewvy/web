@@ -36,12 +36,11 @@ include 'navbar.php';
         // read current record's data
         try {
             // prepare select query
-            $query = "SELECT p.id, p.name, p.description, p.categoryID, c.category_name, p.price 
+            $query = "SELECT p.id, p.name, p.description, p.categoryID, c.category_name, p.price, p.promotion_price, p.manufacture_date, p.expire_date
                   FROM products p
-                  LEFT JOIN product_category c ON p.categoryID = c.categoryID
-                  ORDER BY p.id ASC";
+                  INNER JOIN product_category c ON p.categoryID = c.categoryID
+                  WHERE p.id = ?";
             $stmt = $con->prepare($query);
-            $stmt->execute();
 
             // this is the first question mark
             $stmt->bindParam(1, $id);
@@ -52,16 +51,20 @@ include 'navbar.php';
             // store retrieved row to a variable
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // check if the row is found
-            if (!$row) {
-                die('ERROR: Record not found.');
-            }
-
             // values to fill up our form
             $name = $row['name'];
             $description = $row['description'];
             $price = $row['price'];
+            $promotion_price = $row['promotion_price'];
+            $categoryID = $row['categoryID'];
             $category_name = $row['category_name'];
+            $manufacture_date = $row['manufacture_date'];
+            $expire_date = $row['expire_date'];
+
+            $f_price = "RM" . number_format($price, 2);
+            if ($promotion_price > 0) {
+                $f_price = "<span class='text-decoration-line-through'>" . "RM" . number_format($price, 2) . "</span>" . ' ' . "RM" . number_format($promotion_price, 2);
+            }
         }
 
         // show error
@@ -69,7 +72,6 @@ include 'navbar.php';
             die('ERROR: ' . $exception->getMessage());
         }
         ?>
-
 
         <!--we have our html table here where the record will be displayed-->
         <table class='table table-hover table-responsive table-bordered'>
@@ -86,6 +88,11 @@ include 'navbar.php';
                 </td>
             </tr>
             <tr>
+                <td>Category ID</td>
+                <td>
+                    <?php echo htmlspecialchars($categoryID, ENT_QUOTES); ?>
+                </td>
+            </tr>
             <tr>
                 <td>Category</td>
                 <td>
@@ -95,7 +102,21 @@ include 'navbar.php';
             <tr>
                 <td>Price</td>
                 <td>
-                    <?php echo htmlspecialchars($price, ENT_QUOTES); ?>
+                    <?php echo $f_price; ?>
+
+                </td>
+            </tr>
+            <tr>
+                <td>Manufactre_date</td>
+                <td>
+                    <?php echo htmlspecialchars($manufacture_date, ENT_QUOTES); ?>
+                </td>
+            </tr>
+            <tr>
+            <tr>
+                <td>Expire Date</td>
+                <td>
+                    <?php echo htmlspecialchars($expire_date, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
