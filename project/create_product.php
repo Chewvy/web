@@ -154,7 +154,8 @@ include 'navbar.php';
                 <tr>
                     <td>Promotion Price</td>
                     <td><input type='text' name='promotion_price' class='form-control'
-                            value="<?php echo isset($promotion_price) ? $promotion_price : ''; ?>"></td>
+                            value="<?php echo isset($promotion_price) ? $promotion_price : '';
+                            .00 ?>"></td>
                 </tr>
                 <tr>
                     <td>Manufacture Date</td>
