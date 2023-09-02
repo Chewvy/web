@@ -29,53 +29,55 @@ include 'navbar.php';
 
         <?php
 
-        if ($_POST) {
-            // include database connection
-            include 'config_folder/database.php';
-            ;
-            try {
-                // insert query
-                $query = "INSERT INTO product_category SET category_name=:category_name,description=:description";
+if ($_POST) {
+    // include database connection
+    include 'config_folder/database.php';
 
-                // prepare query for execution
-                $stmt2 = $con->prepare($query);
-                // posted values
-                $category_name = strip_tags($_POST['category_name']);
-                $description = strip_tags($_POST['description']);
+    try {
+        // insert query
+        $query = "INSERT INTO product_category SET category_name=:category_name, description=:description";
 
-                // bind the parameters
-                $stmt2->bindParam(':category_name', $category_name);
-                $stmt2->bindParam(':description', $description);
+        // prepare query for execution
+        $stmt2 = $con->prepare($query);
 
-                // specify when this record was inserted to the database
-        
-                // Execute the query
-                $flag = true;
+        // posted values
+        $category_name = strip_tags($_POST['category_name']);
+        $description = strip_tags($_POST['description']);
 
-                if (empty($category_name)) {
-                    echo "<div class='alert alert-danger'>Please enter a category name.</div>";
-                    $flag = false;
-                }
+        // bind the parameters
+        $stmt2->bindParam(':category_name', $category_name);
+        $stmt2->bindParam(':description', $description);
 
-                if (empty($description)) {
-                    echo "<div class='alert alert-danger'>Please enter a description.</div>";
-                    $flag = false;
-                }
+        // specify when this record was inserted to the database
 
-                if ($flag = true) {
-                    if ($stmt->execute()) {
-                        echo "<div class='alert alert-success'>Record was saved.</div>";
-                    } else {
-                        echo "<div class='alert alert-danger'>Unable to save record.</div>";
-                    }
-                }
-            }
+        // Execute the query
+        $flag = true;
 
-            // show error
-            catch (PDOException $exception) {
-                die('ERROR: ' . $exception->getMessage());
+        if (empty($category_name)) {
+            echo "<div class='alert alert-danger'>Please enter a category name.</div>";
+            $flag = false;
+        }
+
+        if (empty($description)) {
+            echo "<div class='alert alert-danger'>Please enter a description.</div>";
+            $flag = false;
+        }
+
+        if ($flag === true) { // Use triple equals for comparison
+            if ($stmt2->execute()) { // Use $stmt2 to execute the INSERT query
+                echo "<div class='alert alert-success'>Record was saved.</div>";
+            } else {
+                echo "<div class='alert alert-danger'>Unable to save record.</div>";
             }
         }
+    }
+
+    // show error
+    catch (PDOException $exception) {
+        die('ERROR: ' . $exception->getMessage());
+    }
+}
+
         ?>
         <!-- html form here where the product information will be entered -->
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
@@ -95,7 +97,7 @@ include 'navbar.php';
                     <td></td>
                     <td>
                         <input type='submit' value='Save' class='btn btn-primary' />
-                        <a href='categoy_index.php' class='btn btn-danger'>Back to read category</a>
+                        <a href='category_index.php' class='btn btn-danger'>Back to read category</a>
                     </td>
                 </tr>
             </table>
