@@ -1,6 +1,7 @@
 <?php
 session_start();
 ?>
+
 <!DOCTYPE HTML>
 <html>
 
@@ -11,6 +12,7 @@ session_start();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 </head>
+
 <?php
 include 'navbar.php';
 ?>
@@ -27,12 +29,12 @@ include 'navbar.php';
             include 'config_folder/database.php';
 
             try {
-                $query = "INSERT INTO customer SET username=:username, email=:email,password=:password, first_name=:first_name, last_name=:last_name, gender=:gender, DOB=:DOB, account_status=:account_status, registration_date_and_time=:registration_date_and_time";
+                $query = "INSERT INTO customer SET username=:username, email=:email, password=:password, first_name=:first_name, last_name=:last_name, gender=:gender, DOB=:DOB, account_status=:account_status, registration_date_and_time=:registration_date_and_time";
                 $stmt = $con->prepare($query);
 
                 $username = strip_tags(ucwords(strtolower($_POST['username'])));
                 $email = strip_tags(ucwords(strtolower($_POST['email'])));
-                $password = strip_tags($_POST['password']);
+                $password = $_POST['password']; // Get the password as entered by the user.
                 $confirm_password = strip_tags($_POST['confirm_password']);
                 $first_name = strip_tags(ucwords(strtolower($_POST['first_name'])));
                 $last_name = strip_tags(ucwords(strtolower($_POST['last_name'])));
@@ -40,9 +42,12 @@ include 'navbar.php';
                 $DOB = $_POST['DOB'];
                 $account_status = isset($_POST['account_status']) ? $_POST['account_status'] : "";
 
+                // Hash the password before storing it in the database
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
                 $stmt->bindParam(':username', $username);
                 $stmt->bindParam(':email', $email);
-                $stmt->bindParam(':password', $password);
+                $stmt->bindParam(':password', $hashedPassword); // Store the hashed password
                 $stmt->bindParam(':first_name', $first_name);
                 $stmt->bindParam(':last_name', $last_name);
                 $stmt->bindParam(':gender', $gender);
