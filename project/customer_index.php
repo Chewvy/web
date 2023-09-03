@@ -106,8 +106,7 @@ session_start();
                 echo "<td>{$DOB}</td>";
                 echo "<td>{$registration_date_and_time}</td>";
                 echo "<td>{$account_status}</td>";
-                echo "<td><img src='image/{$image}' alt='{$username}' class='img-thumbnail' style='max-width: 100px; max-height: 100px;'></td>";
-                echo "<td>";
+                echo "<td><img src='image/" . (!empty($image) ? htmlspecialchars($image, ENT_QUOTES) : 'default.jpg') . "' alt='{$username}' class='img-thumbnail' style='max-width: 100px; max-height: 100px;'></td>";                echo "<td>";
                 // read one record
                 echo "<a href='customer_read_one.php?customer_id={$customer_id}' class='btn btn-info' style='margin-right: 1em;'>Read</a>";
 
