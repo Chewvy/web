@@ -29,12 +29,12 @@ include 'navbar.php';
             include 'config_folder/database.php';
 
             try {
-                $query = "INSERT INTO customer SET username=:username, email=:email, password=:password, first_name=:first_name, last_name=:last_name, gender=:gender, DOB=:DOB, account_status=:account_status, registration_date_and_time=:registration_date_and_time";
+                $query = "INSERT INTO customer SET username=:username, email=:email, password=:password, first_name=:first_name, last_name=:last_name, gender=:gender, DOB=:DOB, account_status=:account_status, registration_date_and_time=:registration_date_and_time, image=:image";
                 $stmt = $con->prepare($query);
 
                 $username = strip_tags(ucwords(strtolower($_POST['username'])));
                 $email = strip_tags(ucwords(strtolower($_POST['email'])));
-                $password = $_POST['password']; // Get the password as entered by the user.
+                $password = $_POST['password'];
                 $confirm_password = strip_tags($_POST['confirm_password']);
                 $first_name = strip_tags(ucwords(strtolower($_POST['first_name'])));
                 $last_name = strip_tags(ucwords(strtolower($_POST['last_name'])));
@@ -42,17 +42,62 @@ include 'navbar.php';
                 $DOB = $_POST['DOB'];
                 $account_status = isset($_POST['account_status']) ? $_POST['account_status'] : "";
 
+                // Check if the "image" file input is set
+                if (isset($_FILES["image"]["name"]) && !empty($_FILES["image"]["name"])) {
+                    $image_name = $_FILES["image"]["name"];
+                    $image_tmp_name = $_FILES["image"]["tmp_name"];
+                    $image_size = $_FILES["image"]["size"];
+                    $image_type = $_FILES["image"]["type"];
+
+                    $allowed_file_types = array("image/jpeg", "image/jpg", "image/png", "image/gif");
+
+                    if (in_array($image_type, $allowed_file_types)) {
+                        $image_info = getimagesize($image_tmp_name);
+                        $image_width = $image_info[0];
+                        $image_height = $image_info[1];
+
+                        if ($image_width == $image_height) {
+                            if ($image_size <= 512 * 1024) {
+                                $upload_dir = "image/";
+                                $target_file = $upload_dir . $image_name;
+
+                                if (move_uploaded_file($image_tmp_name, $target_file)) {
+                                    // Image uploaded successfully
+                                } else {
+                                    echo "<div class='alert alert-danger'>Unable to upload the image.</div>";
+                                    $flag = false;
+                                }
+                            } else {
+                                echo "<div class='alert alert-danger'>Image size must be less than or equal to 512KB.</div>";
+                                $flag = false;
+                            }
+                        } else {
+                            echo "<div class='alert alert-danger'>Image must be square (same width and height).</div>";
+                            $flag = false;
+                        }
+                    } else {
+                        echo "<div class='alert alert-danger'>Invalid image format. Supported formats: JPG, JPEG, PNG, GIF.</div>";
+                        $flag = false;
+                    }
+                } else {
+                    // No image was uploaded, use the default image
+                    $defaultImage = 'default.jpg'; // Replace with the actual URL of your default image.
+                    $image_name = $defaultImage;
+                    $image_type = ''; // Define a default value for image_type
+                }
+
                 // Hash the password before storing it in the database
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
                 $stmt->bindParam(':username', $username);
                 $stmt->bindParam(':email', $email);
-                $stmt->bindParam(':password', $hashedPassword); // Store the hashed password
+                $stmt->bindParam(':password', $hashedPassword);
                 $stmt->bindParam(':first_name', $first_name);
                 $stmt->bindParam(':last_name', $last_name);
                 $stmt->bindParam(':gender', $gender);
                 $stmt->bindParam(':DOB', $DOB);
                 $stmt->bindParam(':account_status', $account_status);
+                $stmt->bindParam(':image', $image_name);
 
                 $registration_date_and_time = date('Y-m-d H:i:s');
                 $stmt->bindParam(':registration_date_and_time', $registration_date_and_time);
@@ -64,15 +109,15 @@ include 'navbar.php';
                     $flag = false;
                 } elseif (strlen($username) < 6) {
                     echo "<div class='alert alert-danger'>Username must be at least 6 characters long.</div>";
-                    $valid = false;
+                    $flag = false;
                 }
 
                 if (empty($email)) {
                     echo "<div class='alert alert-danger'>Please enter your email.</div>";
-                    $valid = false;
-                } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) { //use to check whether the email is valid or correct if not it will show error,like if it has @ or not
+                    $flag = false;
+                } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     echo "<div class='alert alert-danger'>Invalid email format.</div>";
-                    $valid = false;
+                    $flag = false;
                 }
 
                 if (empty($password)) {
@@ -95,7 +140,7 @@ include 'navbar.php';
                 if (empty($confirm_password)) {
                     echo "<div class='alert alert-danger'>Please confirm your password</div>";
                     $flag = false;
-                } else if ($password !== $confirm_password) {
+                } elseif ($password !== $confirm_password) {
                     echo "<div class='alert alert-danger'>Confirm password does not match with your password</div>";
                     $flag = false;
                 }
@@ -135,11 +180,10 @@ include 'navbar.php';
             } catch (PDOException $exception) {
                 die('ERROR: ' . $exception->getMessage());
             }
-
         }
         ?>
 
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
             <table class='table table-hover table-responsive table-bordered'>
                 <tr>
                     <td>Username:</td>
@@ -168,13 +212,13 @@ include 'navbar.php';
                 <tr>
                     <td>Gender:</td>
                     <td>
-                        <input type="radio" class="gender" name="gender" value="female" <?php echo (isset($gender) && $gender === "female") ? "checked" : ""; ?>>
+                        <input type="radio" class="gender" name="gender" value="female">
                         <label for="female">Female</label>
 
-                        <input type="radio" class="gender" name="gender" value="male" <?php echo (isset($gender) && $gender === "male") ? "checked" : ""; ?>>
+                        <input type="radio" class="gender" name="gender" value="male">
                         <label for="male">Male</label>
 
-                        <input type="radio" class="gender" name="gender" value="others" <?php echo (isset($gender) && $gender === "others") ? "checked" : ""; ?>>
+                        <input type="radio" class="gender" name="gender" value="others">
                         <label for="others">Others</label>
                     </td>
                 </tr>
@@ -186,15 +230,19 @@ include 'navbar.php';
                 <tr>
                     <td>Account Status</td>
                     <td>
-                        <input type="radio" class="account_status" name="account_status" value="active" <?php echo (isset($account_status) && $account_status === "active") ? "checked" : ""; ?>>
+                        <input type="radio" class="account_status" name="account_status" value="active">
                         <label for="active">Active</label>
 
-                        <input type="radio" class="account_status" name="account_status" value="inactive" <?php echo (isset($account_status) && $account_status === "inactive") ? "checked" : ""; ?>>
+                        <input type="radio" class="account_status" name="account_status" value="inactive">
                         <label for="inactive">Inactive</label>
 
-                        <input type="radio" class="account_status" name="account_status" value="pending" <?php echo (isset($account_status) && $account_status === "pending") ? "checked" : ""; ?>>
+                        <input type="radio" class="account_status" name="account_status" value="pending">
                         <label for="pending">Pending</label>
                     </td>
+                </tr>
+                <tr>
+                    <td>Photo</td>
+                    <td><input type="file" name="image" /></td>
                 </tr>
                 <tr>
                     <td></td>
