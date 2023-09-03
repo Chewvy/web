@@ -37,8 +37,8 @@ session_start();
         // include database connection
         include 'config_folder/database.php';
 
-        $query = "SELECT customer_id, username, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status FROM customer
-            ORDER BY username ASC";
+        $query = "SELECT customer_id, username, image, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status FROM customer
+            ORDER BY customer_id ASC";
 
         if ($_GET) {
             $search = $_GET['search'];
@@ -47,7 +47,7 @@ session_start();
                 echo "<div class='alert alert-danger'>Please enter a product keyword</div>";
             }
 
-            $query = "SELECT customer_id, username, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status FROM customer WHERE 
+            $query = "SELECT customer_id, image, username, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status FROM customer WHERE 
             username LIKE '%$search%' OR
             first_name LIKE '%$search%' OR
             last_name LIKE '%$search%'
@@ -83,6 +83,7 @@ session_start();
             echo "<th>Date of Birth</th>";
             echo "<th>Registration Date and Time</th>";
             echo "<th>Account Status</th>";
+            echo "<th>Profile</th>";
             echo "<th>Action</th>";
             echo "</tr>";
 
@@ -105,6 +106,7 @@ session_start();
                 echo "<td>{$DOB}</td>";
                 echo "<td>{$registration_date_and_time}</td>";
                 echo "<td>{$account_status}</td>";
+                echo "<td><img src='image/{$image}' alt='{$username}' class='img-thumbnail' style='max-width: 100px; max-height: 100px;'></td>";
                 echo "<td>";
                 // read one record
                 echo "<a href='customer_read_one.php?customer_id={$customer_id}' class='btn btn-info' style='margin-right: 1em;'>Read</a>";

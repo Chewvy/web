@@ -37,7 +37,7 @@ include 'navbar.php';
         <?php
         // include database connection
         include 'config_folder/database.php';
-        $query = "SELECT p.id, p.name, p.categoryID, p.price, p.promotion_price, c.category_name, p.created 
+        $query = "SELECT p.id, p.name, p.categoryID, p.price, p.image, p.promotion_price, c.category_name, p.created 
         FROM products p
         INNER JOIN product_category c ON p.categoryID = c.categoryID 
         ORDER BY id ASC";
@@ -47,7 +47,7 @@ include 'navbar.php';
             $search = $_GET['search'];
 
             if (!empty($search)) { // Make sure search value is not empty
-                $query = "SELECT p.id, p.name, p.categoryID, p.price, p.promotion_price, c.category_name, p.created 
+                $query = "SELECT p.id, p.image, p.name, p.categoryID, p.price, p.promotion_price, c.category_name, p.created 
                 FROM products p
                 INNER JOIN product_category c ON p.categoryID = c.categoryID 
                 WHERE p.name LIKE '%$search%'
@@ -71,6 +71,7 @@ include 'navbar.php';
             echo "<th>Name</th>";
             echo "<th>Category Name</th>";
             echo "<th>Price</th>";
+            echo "<th>Image</th>";
             echo "<th>Created</th>";
             echo "<th>Action</th>";
             echo "</tr>";
@@ -83,13 +84,18 @@ include 'navbar.php';
                 echo "<td>{$category_name}</td>";
 
                 echo "<td>";
-                $f_price = "RM" . number_format($price, 2);
+                $priceWithoutCurrency = floatval(str_replace("RM", "", $price));
+                $promotionPriceWithoutCurrency = floatval(str_replace("RM", "", $promotion_price));
 
-                if ($promotion_price > 0) {
-                    $f_price = "<span class='text-decoration-line-through'>" . "RM" . number_format($price, 2) . "</span>" . ' ' . "RM" . number_format($promotion_price, 2);
+                $formattedPrice = "RM" . number_format($priceWithoutCurrency, 2);
+
+                if ($promotionPriceWithoutCurrency > 0) {
+                    $formattedPrice = "<span class='text-decoration-line-through'>" . "RM" . number_format($priceWithoutCurrency, 2) . "</span>" . ' ' . "RM" . number_format($promotionPriceWithoutCurrency, 2);
                 }
-                echo $f_price;
+                echo $formattedPrice;
                 echo "</td>";
+                echo "<td><img src='image/{$image}' alt='{$name}' class='img-thumbnail' style='max-width: 100px; max-height: 100px;'></td>";
+
                 echo "<td>{$created}</td>";
 
                 echo "<td>";
