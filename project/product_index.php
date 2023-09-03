@@ -25,16 +25,19 @@ include 'navbar.php';
             <h1>Read Products</h1>
         </div>
 
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get" class="d-flex">
-            <?php echo "<a href='create_product.php' class='btn btn-primary m-b-1em'>Create New Product</a>"; ?>
-            <input type='search' name="search" class="ml-auto"> <!-- Use ml-auto to push to the right -->
-            <input type='submit' value='Search' class='btn btn-primary m-r-1em'>
-        </form>
+        <div class="d-flex justify-content-between mb-4">
+            <a href="create_product.php" class="btn btn-primary m-b-1em">Create New Product</a>
+
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get" class="d-flex">
+                <input type="search" id="search" name="search" class="form-control me-2" />
+                <input type="submit" value="Search" class="btn btn-warning" />
+            </form>
+        </div>
 
         <?php
         // include database connection
         include 'config_folder/database.php';
-        $query = "SELECT p.id, p.name, p.categoryID, p.price, p.promotion_price, c.category_name,p.created 
+        $query = "SELECT p.id, p.name, p.categoryID, p.price, p.promotion_price, c.category_name, p.created 
         FROM products p
         INNER JOIN product_category c ON p.categoryID = c.categoryID 
         ORDER BY id ASC";
@@ -44,7 +47,7 @@ include 'navbar.php';
             $search = $_GET['search'];
 
             if (!empty($search)) { // Make sure search value is not empty
-                $query = "SELECT p.id, p.name, p.categoryID, p.price, p.promotion_price, c.category_name,p.created 
+                $query = "SELECT p.id, p.name, p.categoryID, p.price, p.promotion_price, c.category_name, p.created 
                 FROM products p
                 INNER JOIN product_category c ON p.categoryID = c.categoryID 
                 WHERE p.name LIKE '%$search%'
@@ -61,9 +64,8 @@ include 'navbar.php';
         if ($num > 0) {
 
             // data from the database will be here
-            echo "<table class='table table-hover table-responsive table-bordered'>"; // start table
-        
-            // creating our table heading
+            echo "<div class='table-responsive'>"; // Add a div for table responsiveness
+            echo "<table class='table table-hover table-bordered'>";
             echo "<tr>";
             echo "<th>ID</th>";
             echo "<th>Name</th>";
@@ -73,41 +75,34 @@ include 'navbar.php';
             echo "<th>Action</th>";
             echo "</tr>";
 
-            // retrieve our table contents
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 extract($row);
                 echo "<tr>";
                 echo "<td>{$id}</td>";
                 echo "<td>{$name}</td>";
-                echo "<td>{$category_name}</td>"; // Add this line to display the Category value
-                
+                echo "<td>{$category_name}</td>";
+
                 echo "<td>";
                 $f_price = "RM" . number_format($price, 2);
 
                 if ($promotion_price > 0) {
                     $f_price = "<span class='text-decoration-line-through'>" . "RM" . number_format($price, 2) . "</span>" . ' ' . "RM" . number_format($promotion_price, 2);
                 }
-                echo $f_price; // Display the formatted price
+                echo $f_price;
                 echo "</td>";
                 echo "<td>{$created}</td>";
 
                 echo "<td>";
-                // read one record
                 echo "<a href='product_read_one.php?id={$id}' class='btn btn-info m-r-1em'>Read</a>";
-
-                // we will use this link on the next part of this post
                 echo "<a href='product_update.php?id={$id}' class='btn btn-primary m-r-1em'>Edit</a>";
-
-                // we will use this link on the next part of this post
                 echo "<a href='#' onclick='delete_user({$id});' class='btn btn-danger'>Delete</a>";
                 echo "</td>";
                 echo "</tr>";
             }
 
-            // end table
             echo "</table>";
+            echo "</div>";
         } else {
-            // if no records found
             echo "<div class='alert alert-danger'>No records found.</div>";
         }
         ?>
