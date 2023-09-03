@@ -26,7 +26,7 @@ include 'navbar.php';
         <?php
         // get passed parameter value, in this case, the record ID
         // isset() is a PHP function used to verify if a value is there or not
-        $id = isset($_GET['id']) ? $_GET['id'] : die('ERROR: Record ID not found.');
+        $customer_id = isset($_GET['customer_id']) ? $_GET['customer_id'] : die('ERROR: Record ID not found.');
 
         //include database connection
         include 'config_folder/database.php';
@@ -34,11 +34,11 @@ include 'navbar.php';
         // read current record's data
         try {
             // prepare select query
-            $query = "SELECT username, password, first_name, last_name,gender,DOB,account_status,registration_date_and_time FROM customer WHERE username = ?";
+            $query = "SELECT username, first_name, last_name, gender, DOB, account_status,image, registration_date_and_time FROM customer WHERE customer_id = ?";
             $stmt = $con->prepare($query);
 
             // this is the first question mark
-            $stmt->bindParam(1, $id);
+            $stmt->bindParam(1, $customer_id);
 
             // execute our query
             $stmt->execute();
@@ -53,13 +53,13 @@ include 'navbar.php';
 
             // values to fill up our form
             $username = $row['username'];
-            $password = $row['password'];
             $first_name = $row['first_name'];
             $last_name = $row['last_name'];
             $gender = $row['gender'];
             $DOB = $row['DOB'];
             $account_status = $row['account_status'];
             $registration_date_and_time = $row['registration_date_and_time'];
+            $image = $row['image'];
         }
 
         // show error
@@ -75,12 +75,6 @@ include 'navbar.php';
                 <td>username</td>
                 <td>
                     <?php echo htmlspecialchars($username, ENT_QUOTES); ?>
-                </td>
-            </tr>
-            <tr>
-                <td>password</td>
-                <td>
-                    <?php echo htmlspecialchars($password, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
@@ -117,6 +111,18 @@ include 'navbar.php';
                 <td>registration_date_and_time</td>
                 <td>
                     <?php echo htmlspecialchars($registration_date_and_time, ENT_QUOTES); ?>
+                </td>
+            </tr>
+            <tr>
+                <td>Image</td>
+                <td>
+                    <?php
+                    if (!empty($image)) {
+                        echo "<img src='image/$image' alt='Product Image' style='max-width: 200px;' />";
+                    } else {
+                        echo "<img src='ProductComingSoon.jpg/$image' alt='Product Coming Soon' style='max-width: 200px;' />";
+                    }
+                    ?>
                 </td>
             </tr>
             <tr>
