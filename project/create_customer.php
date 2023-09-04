@@ -42,19 +42,16 @@ include 'navbar.php';
                 $DOB = $_POST['DOB'];
                 $account_status = isset($_POST['account_status']) ? $_POST['account_status'] : "";
 
-                // Check if the "image" file input is set
+               // Check if the "image" file input is set
                 if (isset($_FILES["image"]["name"]) && !empty($_FILES["image"]["name"])) {
                     $image_name = $_FILES["image"]["name"];
                     $image_tmp_name = $_FILES["image"]["tmp_name"];
                     $image_size = $_FILES["image"]["size"];
                     $image_type = $_FILES["image"]["type"];
 
-                    $allowed_file_types = array("image/jpeg", "image/jpg", "image/png", "image/gif");
-
-                    if (in_array($image_type, $allowed_file_types)) {
-                        $image_info = getimagesize($image_tmp_name);
-                        $image_width = $image_info[0];
-                        $image_height = $image_info[1];
+                    // Check if it's a JPEG or JPG image
+                    if ($image_type == "image/jpeg" || $image_type == "image/jpg") {
+                        // Check image dimensions and size here as you did before
 
                         if ($image_width == $image_height) {
                             if ($image_size <= 512 * 1024) {
@@ -75,6 +72,10 @@ include 'navbar.php';
                             echo "<div class='alert alert-danger'>Image must be square (same width and height).</div>";
                             $flag = false;
                         }
+                    } elseif ($image_type == "image/png") {
+                        // Check for PNG image type and perform necessary checks
+                    } elseif ($image_type == "image/gif") {
+                        // Check for GIF image type and perform necessary checks
                     } else {
                         echo "<div class='alert alert-danger'>Invalid image format. Supported formats: JPG, JPEG, PNG, GIF.</div>";
                         $flag = false;
@@ -85,6 +86,7 @@ include 'navbar.php';
                     $image_name = $defaultImage;
                     $image_type = ''; // Define a default value for image_type
                 }
+
 
                 // Hash the password before storing it in the database
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);

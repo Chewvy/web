@@ -26,6 +26,10 @@
     </style>
 </head>
 
+<?php
+include 'navbar.php';
+?>
+
 <body>
     <div class="container">
         <div class="page-header">
@@ -44,7 +48,7 @@
 
         // Read the current record's data
         try {
-            $query = "SELECT customer_id, username, email, first_name, last_name, gender, account_status, image FROM customer WHERE customer_id = ? LIMIT 0,1";
+            $query = "SELECT customer_id, username, email, password, first_name, last_name, gender, account_status, image FROM customer WHERE customer_id = ? LIMIT 0,1";
             $stmt = $con->prepare($query);
 
             $stmt->bindParam(1, $customer_id);
@@ -54,6 +58,7 @@
             $customer_id = $row['customer_id'];
             $username = $row['username'];
             $email = $row['email'];
+            $password = $row['password'];
             $first_name = $row['first_name'];
             $last_name = $row['last_name'];
             $gender = $row['gender'];
@@ -68,24 +73,6 @@
         // Check if the form was submitted
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             try {
-                $query = "UPDATE customer
-                          SET username = :username, email = :email, first_name = :first_name, last_name = :last_name, gender = :gender, account_status = :account_status";
-
-                // If a new password is provided, update the password field
-                if (!empty($_POST['new_password'])) {
-                    $query .= ", password = :password";
-                    $password = md5($_POST['new_password']);
-                }
-
-                if (!empty($_FILES['image']['name'])) {
-                    $query .= ", image = :image";
-                    $image = $_FILES['image']['name'];
-                    $image_temp = $_FILES['image']['tmp_name'];
-                }
-
-                $query .= " WHERE customer_id = :customer_id";
-                $stmt = $con->prepare($query);
-
                 $username = strip_tags($_POST['username']);
                 $email = strip_tags($_POST['email']);
                 $first_name = strip_tags($_POST['first_name']);
@@ -95,6 +82,7 @@
                 // Handle image upload
                 $image = $_FILES['image']['name'];
                 $image_temp = $_FILES['image']['tmp_name'];
+                $defaultImage = 'default.jpg';
 
                 $flag = true;
 
@@ -109,6 +97,24 @@
                 } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     echo "<div class='alert alert-danger'>Invalid email format.</div>";
                     $flag = false;
+                }
+
+                // Check if a new password is provided
+                if (!empty($_POST['new_password'])) {
+                    // Check the old password
+                    if (empty($_POST['old_password']) || md5($_POST['old_password']) !== $password) {
+                        echo "<div class='alert alert-danger'>Incorrect old password.</div>";
+                        $flag = false;
+                    } elseif (empty($_POST['confirm_password'])) {
+                        echo "<div class='alert alert-danger'>Please enter both new password and confirm password.</div>";
+                        $flag = false;
+                    } elseif ($_POST['new_password'] !== $_POST['confirm_password']) {
+                        echo "<div class='alert alert-danger'>New password and confirm password do not match.</div>";
+                        $flag = false;
+                    } else {
+                        // Hash the new password with MD5
+                        $password = md5($_POST['new_password']);
+                    }
                 }
 
                 if (empty($first_name)) {
@@ -131,25 +137,86 @@
                     $flag = false;
                 }
 
-                // Check if a new password is provided
-                if (!empty($_POST['new_password'])) {
-                    // Check the old password
-                    if (empty($_POST['old_password']) || md5($_POST['old_password']) !== $password) {
-                        echo "<div class='alert alert-danger'>Incorrect old password.</div>";
-                        $flag = false;
-                    } elseif (empty($_POST['confirm_password'])) {
-                        echo "<div class='alert alert-danger'>Please enter both new password and confirm password.</div>";
-                        $flag = false;
-                    } elseif ($_POST['new_password'] !== $_POST['confirm_password']) {
-                        echo "<div class='alert alert-danger'>New password and confirm password do not match.</div>";
-                        $flag = false;
+                // Handle the "Delete Current Image" option
+                if (isset($_POST['delete_image']) && $_POST['delete_image'] == 1) {
+                    // User wants to delete the current image
+                    if (!empty($row['image']) && file_exists("image/" . $row['image'])) {
+                        unlink("image/" . $row['image']);
+                    }
+                    $image = $defaultImage; // Set the image to the default image filename
+                } elseif (empty($image)) {
+                    // If no new image is uploaded and no deletion requested, retain the old image filename
+                    $image = $row['image'];
+
+                    // Check if the image is empty (no new image and no deletion)
+                    if (empty($image)) {
+                        // Set the image to the default image filename
+                        $image = $defaultImage;
+                    }
+                }
+
+                // Check if the "image" file input is set
+                if (isset($_FILES["image"]["name"]) && !empty($_FILES["image"]["name"])) {
+                    $image_name = $_FILES["image"]["name"];
+                    $image_tmp_name = $_FILES["image"]["tmp_name"];
+                    $image_size = $_FILES["image"]["size"];
+                    $image_type = $_FILES["image"]["type"];
+
+                    // Check if it's a JPEG or JPG image
+                    if ($image_type == "image/jpeg" || $image_type == "image/jpg") {
+                        // Get the image dimensions
+                        list($image_width, $image_height) = getimagesize($image_tmp_name);
+
+                        if ($image_width == $image_height) {
+                            if ($image_size <= 512 * 1024) {
+                                $upload_dir = "image/";
+                                $target_file = $upload_dir . $image_name;
+
+                                if (move_uploaded_file($image_tmp_name, $target_file)) {
+                                    // Image uploaded successfully
+                                } else {
+                                    echo "<div class='alert alert-danger'>Unable to upload the image.</div>";
+                                    $flag = false;
+                                }
+                            } else {
+                                echo "<div class='alert alert-danger'>Image size must be less than or equal to 512KB.</div>";
+                                $flag = false;
+                            }
+                        } else {
+                            echo "<div class='alert alert-danger'>Image must be square (same width and height).</div>";
+                            $flag = false;
+                        }
+
+                    } elseif ($image_type == "image/png") {
+                        // Check for PNG image type and perform necessary checks
+                    } elseif ($image_type == "image/gif") {
+                        // Check for GIF image type and perform necessary checks
                     } else {
-                        // Hash the new password with MD5
-                        $password = md5($_POST['new_password']);
+                        echo "<div class='alert alert-danger'>Invalid image format. Supported formats: JPG, JPEG, PNG, GIF.</div>";
+                        $flag = false;
+                    }
+                       // Move the uploaded file to the desired location
+                    $upload_dir = "image/";
+                    $target_file = $upload_dir . $image_name;
+
+                    if (move_uploaded_file($image_tmp_name, $target_file)) {
+                        // Image uploaded successfully
+                        $image = $image_name; // Update the $image variable with the new filename
+                    } else {
+                        echo "<div class='alert alert-danger'>Unable to upload the image.</div>";
+                        $flag = false; // Changed from true to false
                     }
                 }
 
                 if ($flag) {
+                    $query = "UPDATE customer
+                              SET username = :username, email = :email, first_name = :first_name, last_name = :last_name, gender = :gender, account_status = :account_status";
+                    
+                    $query .= " WHERE customer_id = :customer_id";
+                    
+                    // Prepare query for execution
+                    $stmt = $con->prepare($query);
+                    
                     // Bind parameters
                     $stmt->bindParam(':customer_id', $customer_id);
                     $stmt->bindParam(':username', $username);
@@ -159,47 +226,28 @@
                     $stmt->bindParam(':gender', $gender);
                     $stmt->bindParam(':account_status', $account_status);
                     
-                    // If a new password is provided, bind it
+                    // If a new password is provided, bind the password parameter
                     if (!empty($_POST['new_password'])) {
-                        $stmt->bindParam(':password', $password);
+                        $stmt->bindParam(':password', $password, PDO::PARAM_STR);
                     }
-
-                    // If an image is uploaded, move it to the target directory and bind the image parameter
+                    
+                    // If a new image is uploaded, bind the image parameter
                     if (!empty($_FILES['image']['name'])) {
-                        // Define the target directory where you want to store the uploaded images
-                        $targetDir = "image/";
-
-                        // Get the original file name
-                        $originalFileName = $_FILES['image']['name'];
-
-                        // Generate a unique name for the uploaded file to avoid overwriting
-                        $uniqueFileName = time() . '_' . $originalFileName;
-
-                        // Define the path where the image will be saved
-                        $targetPath = $targetDir . $uniqueFileName;
-
-                        // Move the uploaded file to the target directory
-                        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                            echo "<div class='alert alert-success'>Image uploaded successfully.</div>";
-                            $stmt->bindParam(':image', $uniqueFileName);
-                        } else {
-                            echo "<div class='alert alert-danger'>Failed to upload image.</div>";
-                        }
+                        $stmt->bindParam(':image', $image);
                     }
-
+                    
                     // Execute the query
                     if ($stmt->execute()) {
-                        echo "<div class='alert alert-success'>Record was updated.</div>";
+                        echo "<div class='alert alert-success'>Record was updated successfully.</div>";
                     } else {
-                        echo "<div class='alert alert-danger'>Unable to update record. Please try again.</div>";
+                        echo "<div class='alert alert-danger'>Unable to update the record.</div>";
                     }
                 }
             } catch (PDOException $exception) {
-                die('ERROR: ' . $exception->getMessage());
+                echo "<div class='alert alert-danger'>Error: " . $exception->getMessage() . "</div>";
             }
         }
         ?>
-
         <div class="row">
             <div class="col-md-12">
                 <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . '?' . $_SERVER['QUERY_STRING']); ?>"
@@ -249,13 +297,16 @@
                             <tr>
                                 <td>Gender:</td>
                                 <td>
-                                    <input type="radio" class="gender" name="gender" value="female" <?php echo ($gender === "female") ? "checked" : ""; ?>>
+                                    <input type="radio" class="gender" name="gender" value="female"
+                                        <?php echo ($gender === "female") ? "checked" : ""; ?>>
                                     <label for="female">Female</label>
 
-                                    <input type="radio" class="gender" name="gender" value="male" <?php echo ($gender === "male") ? "checked" : ""; ?>>
+                                    <input type="radio" class="gender" name="gender" value="male"
+                                        <?php echo ($gender === "male") ? "checked" : ""; ?>>
                                     <label for="male">Male</label>
 
-                                    <input type="radio" class="gender" name="gender" value="others" <?php echo ($gender === "others") ? "checked" : ""; ?>>
+                                    <input type="radio" class="gender" name="gender" value="others"
+                                        <?php echo ($gender === "others") ? "checked" : ""; ?>>
                                     <label for="others">Others</label>
                                 </td>
                             </tr>
@@ -274,6 +325,10 @@
                                         <?php echo (isset($account_status) && $account_status === "pending") ? "checked" : ""; ?>>
                                     <label for="pending">Pending</label>
                                 </td>
+                            </tr>
+                            <tr>
+                                <td>Delete Current Image</td>
+                                <td><input type="checkbox" name="delete_image" value="1" /> Check this to delete the current image</td>
                             </tr>
                             <tr>
                                 <td>Photo</td>

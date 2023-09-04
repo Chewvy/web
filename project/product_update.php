@@ -30,6 +30,10 @@ session_start();
     </style>
 </head>
 
+<?php
+include 'navbar.php';
+?>
+
 <body>
     <div class="container">
         <div class="page-header">
@@ -91,8 +95,9 @@ session_start();
                 // Handle image upload
                 $image = $_FILES['image']['name'];
                 $image_temp = $_FILES['image']['tmp_name'];
+                // Define a default image filename
+                $defaultImage = 'ProductComingSoon.jpg';
 
-               
 
                 // Execute the query
                 $flag = true;
@@ -114,16 +119,23 @@ session_start();
                     $flag = false;
                 }
 
+                // Check if promotion_price is not empty and is a number
                 if (!empty($promotion_price)) {
-                    if (!is_numeric($promotion_price)) {
+                    // Extract and store the numeric part without "RM"
+                    $promotion_price_numeric = preg_replace('/[^0-9.]/', '', $promotion_price);
+
+                    if (!is_numeric($promotion_price_numeric)) {
                         echo "<div class='alert alert-danger'>Promotion price must be a number</div>";
                         $flag = false;
-                    } elseif ($promotion_price > $price) {
+                    } elseif ($promotion_price_numeric > $price) {
                         echo "<div class='alert alert-danger'>Promotion price must be lower than the original price</div>";
                         $flag = false;
+                    } else {
+                        // Store the promotion_price with "RM" prefix
+                        $promotion_price = 'RM ' . $promotion_price_numeric;
                     }
                 } else {
-                    $promotion_price = 0;
+                    $promotion_price = 'RM 0.00'; // Set a default value with "RM" prefix
                 }
 
                 if (empty($manufacture_date)) {
@@ -142,8 +154,8 @@ session_start();
                     $flag = false;
                 }
 
-                 // Check if a new image is uploaded
-                 if (!empty($image)) {
+              // Check if a new image is uploaded
+                if (!empty($image)) {
                     // Check if there is an old image to delete
                     if (!empty($row['image']) && file_exists("image/" . $row['image'])) {
                         unlink("image/" . $row['image']);
@@ -151,9 +163,21 @@ session_start();
 
                     // Move the new image to the destination folder
                     move_uploaded_file($image_temp, "image/$image");
+                } elseif (isset($_POST['delete_image']) && $_POST['delete_image'] == 1) {
+                    // User wants to delete the current image
+                    if (!empty($row['image']) && file_exists("image/" . $row['image'])) {
+                        unlink("image/" . $row['image']);
+                    }
+                    $image = $defaultImage; // Set the image to the default image filename
                 } else {
-                    // If no new image is uploaded, retain the old image filename
+                    // If no new image is uploaded and no deletion requested, retain the old image filename
                     $image = $row['image'];
+
+                    // Check if the image is empty (no new image and no deletion)
+                    if (empty($image)) {
+                        // Set the image to the default image filename
+                        $image = $defaultImage;
+                    }
                 }
 
                 if ($flag) {
@@ -233,6 +257,10 @@ session_start();
                     <td colspan="2"><input type='text' name='promotion_price'
                             value="<?php echo htmlspecialchars($promotion_price, ENT_QUOTES); ?>"
                             class='form-control' /></td>
+                </tr>
+                <tr>
+                    <td>Delete Current Image</td>
+                    <td><input type="checkbox" name="delete_image" value="1" /> Check this to delete the current image</td>
                 </tr>
                 <tr>
                     <td>Photo</td>
