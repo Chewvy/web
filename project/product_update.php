@@ -155,30 +155,45 @@ include 'navbar.php';
                 }
 
               // Check if a new image is uploaded
-                if (!empty($image)) {
-                    // Check if there is an old image to delete
-                    if (!empty($row['image']) && file_exists("image/" . $row['image'])) {
-                        unlink("image/" . $row['image']);
-                    }
-
+              if (!empty($_FILES['image']['name'])) {
+                $image_temp = $_FILES['image']['tmp_name'];
+                $image_info = getimagesize($image_temp);
+                $image_width = $image_info[0];
+                $image_height = $image_info[1];
+                
+                // Check if the uploaded image is square (same width and height)
+                if ($image_width == $image_height) {
+                    echo "<div class='alert alert-danger'>Please upload a square image.</div>";
+                    $flag = false;
+                }
+                
+                // Check if the file size is within the allowed limit (512KB)
+                if ($_FILES['image']['size'] > 512 * 1024) {
+                    echo "<div class='alert alert-danger'>Image size exceeds the allowed limit (512KB).</div>";
+                    $flag = false;
+                }
+                
+                if ($flag) {
                     // Move the new image to the destination folder
                     move_uploaded_file($image_temp, "image/$image");
-                } elseif (isset($_POST['delete_image']) && $_POST['delete_image'] == 1) {
-                    // User wants to delete the current image
-                    if (!empty($row['image']) && file_exists("image/" . $row['image'])) {
-                        unlink("image/" . $row['image']);
-                    }
-                    $image = $defaultImage; // Set the image to the default image filename
-                } else {
-                    // If no new image is uploaded and no deletion requested, retain the old image filename
-                    $image = $row['image'];
-
-                    // Check if the image is empty (no new image and no deletion)
-                    if (empty($image)) {
-                        // Set the image to the default image filename
-                        $image = $defaultImage;
-                    }
                 }
+            } elseif (isset($_POST['delete_image']) && $_POST['delete_image'] == 1) {
+                // User wants to delete the current image
+                if (!empty($row['image']) && file_exists("image/" . $row['image'])) {
+                    unlink("image/" . $row['image']);
+                }
+                $image = $defaultImage; // Set the image to the default image filename
+            } else {
+                // If no new image is uploaded and no deletion requested, retain the old image filename
+                $image = $row['image'];
+
+                // Check if the image is empty (no new image and no deletion)
+                if (empty($image)) {
+                    // Set the image to the default image filename
+                    $image = $defaultImage;
+                }
+            }
+
 
                 if ($flag) {
                     // Update query

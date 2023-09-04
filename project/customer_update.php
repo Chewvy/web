@@ -137,15 +137,27 @@ include 'navbar.php';
                     $flag = false;
                 }
 
-                // Check if a new image is uploaded
-                if (!empty($row['image'])) {
-                    $imagePath = "image/" . $row['image'];
-                    if (file_exists($image)) {
-                        unlink($image);
+               // Check if a new image is uploaded
+                if (!empty($_FILES['image']['name'])) {
+                    $image_temp = $_FILES['image']['tmp_name'];
+                    $image_info = getimagesize($image_temp);
+                    
+                    // Check if the uploaded image is square (same width and height)
+                    if ($image_info[0] != $image_info[1]) {
+                        echo "<div class='alert alert-danger'>Please upload a square image.</div>";
+                        $flag = false;
                     }
-
-                    // Move the new image to the destination folder
-                    move_uploaded_file($image_temp, "image/$image");
+                    
+                    // Check if the file size is within the allowed limit (512KB)
+                    if ($_FILES['image']['size'] > 512 * 1024) {
+                        echo "<div class='alert alert-danger'>Image size exceeds the allowed limit (512KB).</div>";
+                        $flag = false;
+                    }
+                    
+                    if ($flag) {
+                        // Move the new image to the destination folder
+                        move_uploaded_file($image_temp, "image/$image");
+                    }
                 } elseif (isset($_POST['delete_image']) && $_POST['delete_image'] == 1) {
                     // User wants to delete the current image
                     if (!empty($row['image']) && file_exists("image/" . $row['image'])) {
@@ -162,6 +174,7 @@ include 'navbar.php';
                         $image = $defaultImage;
                     }
                 }
+
 
                 if ($flag) {
                     $query = "UPDATE customer
