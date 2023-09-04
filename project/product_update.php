@@ -33,7 +33,7 @@ session_start();
 <?php
 include 'navbar.php';
 ?>
-
+ 
 <body>
     <div class="container">
         <div class="page-header">

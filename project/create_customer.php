@@ -25,7 +25,7 @@ include 'navbar.php';
         </div>
 
         <?php
-        if ($_POST) {
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
             include 'config_folder/database.php';
 
             try {
@@ -35,58 +35,12 @@ include 'navbar.php';
                 $username = strip_tags(ucwords(strtolower($_POST['username'])));
                 $email = strip_tags(ucwords(strtolower($_POST['email'])));
                 $password = $_POST['password'];
-                $confirm_password = strip_tags($_POST['confirm_password']);
+                $confirm_password = $_POST['confirm_password'];
                 $first_name = strip_tags(ucwords(strtolower($_POST['first_name'])));
                 $last_name = strip_tags(ucwords(strtolower($_POST['last_name'])));
                 $gender = isset($_POST['gender']) ? $_POST['gender'] : "";
                 $DOB = $_POST['DOB'];
                 $account_status = isset($_POST['account_status']) ? $_POST['account_status'] : "";
-
-               // Check if the "image" file input is set
-                if (isset($_FILES["image"]["name"]) && !empty($_FILES["image"]["name"])) {
-                    $image_name = $_FILES["image"]["name"];
-                    $image_tmp_name = $_FILES["image"]["tmp_name"];
-                    $image_size = $_FILES["image"]["size"];
-                    $image_type = $_FILES["image"]["type"];
-
-                    // Check if it's a JPEG or JPG image
-                    if ($image_type == "image/jpeg" || $image_type == "image/jpg") {
-                        // Check image dimensions and size here as you did before
-
-                        if ($image_width == $image_height) {
-                            if ($image_size <= 512 * 1024) {
-                                $upload_dir = "image/";
-                                $target_file = $upload_dir . $image_name;
-
-                                if (move_uploaded_file($image_tmp_name, $target_file)) {
-                                    // Image uploaded successfully
-                                } else {
-                                    echo "<div class='alert alert-danger'>Unable to upload the image.</div>";
-                                    $flag = false;
-                                }
-                            } else {
-                                echo "<div class='alert alert-danger'>Image size must be less than or equal to 512KB.</div>";
-                                $flag = false;
-                            }
-                        } else {
-                            echo "<div class='alert alert-danger'>Image must be square (same width and height).</div>";
-                            $flag = false;
-                        }
-                    } elseif ($image_type == "image/png") {
-                        // Check for PNG image type and perform necessary checks
-                    } elseif ($image_type == "image/gif") {
-                        // Check for GIF image type and perform necessary checks
-                    } else {
-                        echo "<div class='alert alert-danger'>Invalid image format. Supported formats: JPG, JPEG, PNG, GIF.</div>";
-                        $flag = false;
-                    }
-                } else {
-                    // No image was uploaded, use the default image
-                    $defaultImage = 'default.jpg'; // Replace with the actual URL of your default image.
-                    $image_name = $defaultImage;
-                    $image_type = ''; // Define a default value for image_type
-                }
-
 
                 // Hash the password before storing it in the database
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -128,20 +82,6 @@ include 'navbar.php';
                 } elseif (strlen($password) < 8) {
                     echo "<div class='alert alert-danger'>Password must be at least 8 characters long.</div>";
                     $flag = false;
-                } elseif (strtolower($password) == $password || strtoupper($password) == $password) {
-                    echo "<div class='alert alert-danger'>Password must have at least 1 capital and 1 small letter.</div>";
-                    $flag = false;
-                } elseif (strpbrk($password, '0123456789') == false) {
-                    echo "<div class='alert alert-danger'>Password must contain at least one number.</div>";
-                    $flag = false;
-                } elseif (strpbrk($password, '+$()%@#') == true) {
-                    echo "<div class='alert alert-danger'>Password must not contain +$()%@#.</div>";
-                    $flag = false;
-                }
-
-                if (empty($confirm_password)) {
-                    echo "<div class='alert alert-danger'>Please confirm your password</div>";
-                    $flag = false;
                 } elseif ($password !== $confirm_password) {
                     echo "<div class='alert alert-danger'>Confirm password does not match with your password</div>";
                     $flag = false;
@@ -170,6 +110,51 @@ include 'navbar.php';
                 if (empty($account_status)) {
                     echo "<div class='alert alert-danger'>Please select your account status</div>";
                     $flag = false;
+                }
+
+                // Check if the "image" file input is set
+                if (isset($_FILES["image"]["name"]) && !empty($_FILES["image"]["name"])) {
+                    $image_name = $_FILES["image"]["name"];
+                    $image_tmp_name = $_FILES["image"]["tmp_name"];
+                    $image_size = $_FILES["image"]["size"];
+                    $image_type = $_FILES["image"]["type"];
+
+                    // Check if it's a JPEG or JPG image
+                    if ($image_type == "image/jpeg" || $image_type == "image/jpg") {
+                        list($image_width, $image_height) = getimagesize($image_tmp_name); // Calculate image dimensions
+
+                        if ($image_width == $image_height) {
+                            if ($image_size <= 512 * 1024) {
+                                $upload_dir = "image/";
+                                $target_file = $upload_dir . $image_name;
+
+                                if (move_uploaded_file($image_tmp_name, $target_file)) {
+                                    // Image uploaded successfully
+                                } else {
+                                    echo "<div class='alert alert-danger'>Unable to upload the image.</div>";
+                                    $flag = false;
+                                }
+                            } else {
+                                echo "<div class='alert alert-danger'>Image size must be less than or equal to 512KB.</div>";
+                                $flag = false;
+                            }
+                        } else {
+                            echo "<div class='alert alert-danger'>Image must be square (same width and height).</div>";
+                            $flag = false;
+                        }
+                    } elseif ($image_type == "image/png") {
+                        // Check for PNG image type and perform necessary checks
+                    } elseif ($image_type == "image/gif") {
+                        // Check for GIF image type and perform necessary checks
+                    } else {
+                        echo "<div class='alert alert-danger'>Invalid image format. Supported formats: JPG, JPEG, PNG, GIF.</div>";
+                        $flag = false;
+                    }
+                } else {
+                    // No image was uploaded, use the default image
+                    $defaultImage = 'default.jpg'; // Replace with the actual URL of your default image.
+                    $image_name = $defaultImage;
+                    $image_type = ''; // Define a default value for image_type
                 }
 
                 if ($flag) {

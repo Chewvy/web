@@ -137,14 +137,22 @@ include 'navbar.php';
                     $flag = false;
                 }
 
-                // Handle the "Delete Current Image" option
-                if (isset($_POST['delete_image']) && $_POST['delete_image'] == 1) {
+                // Check if a new image is uploaded
+                if (!empty($row['image'])) {
+                    $imagePath = "image/" . $row['image'];
+                    if (file_exists($image)) {
+                        unlink($image);
+                    }
+
+                    // Move the new image to the destination folder
+                    move_uploaded_file($image_temp, "image/$image");
+                } elseif (isset($_POST['delete_image']) && $_POST['delete_image'] == 1) {
                     // User wants to delete the current image
                     if (!empty($row['image']) && file_exists("image/" . $row['image'])) {
                         unlink("image/" . $row['image']);
                     }
                     $image = $defaultImage; // Set the image to the default image filename
-                } elseif (empty($image)) {
+                } else {
                     // If no new image is uploaded and no deletion requested, retain the old image filename
                     $image = $row['image'];
 
@@ -155,64 +163,11 @@ include 'navbar.php';
                     }
                 }
 
-                // Check if the "image" file input is set
-                if (isset($_FILES["image"]["name"]) && !empty($_FILES["image"]["name"])) {
-                    $image_name = $_FILES["image"]["name"];
-                    $image_tmp_name = $_FILES["image"]["tmp_name"];
-                    $image_size = $_FILES["image"]["size"];
-                    $image_type = $_FILES["image"]["type"];
-
-                    // Check if it's a JPEG or JPG image
-                    if ($image_type == "image/jpeg" || $image_type == "image/jpg") {
-                        // Get the image dimensions
-                        list($image_width, $image_height) = getimagesize($image_tmp_name);
-
-                        if ($image_width == $image_height) {
-                            if ($image_size <= 512 * 1024) {
-                                $upload_dir = "image/";
-                                $target_file = $upload_dir . $image_name;
-
-                                if (move_uploaded_file($image_tmp_name, $target_file)) {
-                                    // Image uploaded successfully
-                                } else {
-                                    echo "<div class='alert alert-danger'>Unable to upload the image.</div>";
-                                    $flag = false;
-                                }
-                            } else {
-                                echo "<div class='alert alert-danger'>Image size must be less than or equal to 512KB.</div>";
-                                $flag = false;
-                            }
-                        } else {
-                            echo "<div class='alert alert-danger'>Image must be square (same width and height).</div>";
-                            $flag = false;
-                        }
-
-                    } elseif ($image_type == "image/png") {
-                        // Check for PNG image type and perform necessary checks
-                    } elseif ($image_type == "image/gif") {
-                        // Check for GIF image type and perform necessary checks
-                    } else {
-                        echo "<div class='alert alert-danger'>Invalid image format. Supported formats: JPG, JPEG, PNG, GIF.</div>";
-                        $flag = false;
-                    }
-                       // Move the uploaded file to the desired location
-                    $upload_dir = "image/";
-                    $target_file = $upload_dir . $image_name;
-
-                    if (move_uploaded_file($image_tmp_name, $target_file)) {
-                        // Image uploaded successfully
-                        $image = $image_name; // Update the $image variable with the new filename
-                    } else {
-                        echo "<div class='alert alert-danger'>Unable to upload the image.</div>";
-                        $flag = false; // Changed from true to false
-                    }
-                }
-
                 if ($flag) {
                     $query = "UPDATE customer
-                              SET username = :username, email = :email, first_name = :first_name, last_name = :last_name, gender = :gender, account_status = :account_status";
-                    
-                    $query .= " WHERE customer_id = :customer_id";
+                    SET username = :username, email = :email, password=:password, first_name = :first_name, last_name = :last_name, gender = :gender, account_status = :account_status,image=:image
+                    WHERE customer_id = :customer_id";
+
                     
                     // Prepare query for execution
                     $stmt = $con->prepare($query);
@@ -221,20 +176,12 @@ include 'navbar.php';
                     $stmt->bindParam(':customer_id', $customer_id);
                     $stmt->bindParam(':username', $username);
                     $stmt->bindParam(':email', $email);
+                    $stmt->bindParam(':password', $password);
                     $stmt->bindParam(':first_name', $first_name);
                     $stmt->bindParam(':last_name', $last_name);
                     $stmt->bindParam(':gender', $gender);
                     $stmt->bindParam(':account_status', $account_status);
-                    
-                    // If a new password is provided, bind the password parameter
-                    if (!empty($_POST['new_password'])) {
-                        $stmt->bindParam(':password', $password, PDO::PARAM_STR);
-                    }
-                    
-                    // If a new image is uploaded, bind the image parameter
-                    if (!empty($_FILES['image']['name'])) {
-                        $stmt->bindParam(':image', $image);
-                    }
+                    $stmt->bindParam(':image', $image);
                     
                     // Execute the query
                     if ($stmt->execute()) {
