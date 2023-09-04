@@ -15,9 +15,9 @@ session_start();
 </head>
 
 <body>
-<?php
-include 'navbar.php';
-?>
+    <?php
+    include 'navbar.php';
+    ?>
     <!-- container -->
     <div class="container">
         <div class="page-header">
@@ -61,7 +61,6 @@ include 'navbar.php';
 
         $stmt = $con->prepare($query);
         $stmt->execute();
-        
 
         $query = "SELECT order_id, customer_id, order_date FROM order_summary ORDER BY order_id ASC";
         $stmt = $con->prepare($query);
@@ -94,7 +93,7 @@ include 'navbar.php';
                 $order_details_stmt->bindParam(':order_id', $order_id);
                 $order_details_stmt->execute();
 
-                $total_price = 0;
+                $total_price = 0.0; // Initialize total price as a float
 
                 while ($order_detail_row = $order_details_stmt->fetch(PDO::FETCH_ASSOC)) {
                     $product_id = $order_detail_row['product_id'];
@@ -107,14 +106,17 @@ include 'navbar.php';
                     $product_info = $product_stmt->fetch(PDO::FETCH_ASSOC);
 
                     if ($product_info) {
-                        $product_price = $product_info['price'];
-                        $product_promotion_price = $product_info['promotion_price'];
-                        $item_price = ($product_promotion_price > 0) ? $product_promotion_price : $product_price;
-                        $item_total_price = $item_price * $quantity;
+                        $product_price = $product_info['price']; // Ensure it's a float
+                        $product_promotion_price = $product_info['promotion_price']; // Ensure it's a float
+                        $item_price = ($product_promotion_price > 0.0) ? $product_promotion_price : $product_price;
+                        $item_total_price = $item_price * $quantity; // Ensure they are floats
 
-                        $total_price += $item_total_price;
+                        // Ensure that $item_total_price is a numeric value before adding to $total_price
+                        if (is_numeric($item_total_price)) {
+                            $total_price += $item_total_price;
+                        }
                     } else {
-                        $item_total_price = 0;
+                        $item_total_price = 0.0;
                     }
                 }
                 $total_price = number_format($total_price, 2);

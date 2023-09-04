@@ -74,7 +74,7 @@ include 'navbar.php';
 
                 $productID_array = array_unique($_POST["product_ID"]);
 
-                if (isset($_POST['selected_num_products'])) {
+                if (isset($_POST['selected_num_products']) && is_numeric($_POST['selected_num_products'])) {
                     $selected_num_products = intval($_POST['selected_num_products']);
                 } else {
                     $selected_num_products = 3;
