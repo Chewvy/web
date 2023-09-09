@@ -82,22 +82,22 @@ include 'navbar.php';
                     $flag = false;
                 }
 
-                $image = "";
+                $image = "";//empty string
 
                     // Check if an image was uploaded
-                    if (!empty($_FILES["image"]["name"])) {
+                    if (!empty($_FILES["image"]["name"])) {//if its true then check
                         // Get image information
                         $image_name = $_FILES["image"]["name"];
                         $image_size = $_FILES["image"]["size"];
                         $image_type = $_FILES["image"]["type"];
-                        $image_tmp_name = $_FILES["image"]["tmp_name"];
+                        $image_tmp_name = $_FILES["image"]["tmp_name"];//extract information
     
                         // Check if the uploaded file is an image
                         $allowed_file_types = array("image/jpeg", "image/jpg", "image/png", "image/gif");
-                        if (in_array($image_type, $allowed_file_types)) {
+                        if (in_array($image_type, $allowed_file_types)) {//如果有meet requirement就会写true,别人就是false
                             // Check if it's a square image (width and height are equal)
                             $image_info = getimagesize($image_tmp_name);
-                            $image_width = $image_info[0];
+                            $image_width = $image_info[0];//check width and height
                             $image_height = $image_info[1];
     
                             if ($image_width == $image_height) {
@@ -129,8 +129,8 @@ include 'navbar.php';
                         $image = "ProductComingSoon.jpg";
                     }
 
-                // now, if image is not empty, try to upload
-                if ($flag) { // No need to use === true, just use $flag directly
+                // now, if image is not empty
+                if ($flag) {
                     // insert query
                     $query = "INSERT INTO products SET name=:name, description=:description, price=:price, promotion_price=:promotion_price, image=:image, manufacture_date=:manufacture_date, expire_date=:expire_date, created=:created, categoryID=:categoryID";
 
