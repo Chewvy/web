@@ -71,50 +71,56 @@ include 'navbar.php';
 
         <!--we have our html table here where the record will be displayed-->
         <table class='table table-hover table-responsive table-bordered'>
+        <tr>
+                <td>Customer ID</td>
+                <td>
+                    <?php echo htmlspecialchars($customer_id, ENT_QUOTES); ?>
+                </td>
+            </tr>
             <tr>
-                <td>username</td>
+                <td>Username</td>
                 <td>
                     <?php echo htmlspecialchars($username, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
-                <td>first_name</td>
+                <td>First Name</td>
                 <td>
                     <?php echo htmlspecialchars($first_name, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
-                <td>last_name</td>
+                <td>Last Name</td>
                 <td>
                     <?php echo htmlspecialchars($last_name, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
-                <td>gender</td>
+                <td>Gender</td>
                 <td>
                     <?php echo htmlspecialchars($gender, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
-                <td>DOB</td>
+                <td>Date of Birth</td>
                 <td>
                     <?php echo htmlspecialchars($DOB, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
-                <td>account_status</td>
+                <td>Account Status</td>
                 <td>
                     <?php echo htmlspecialchars($account_status, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
-                <td>registration_date_and_time</td>
+                <td>Registration Date & Time</td>
                 <td>
                     <?php echo htmlspecialchars($registration_date_and_time, ENT_QUOTES); ?>
                 </td>
             </tr>
             <tr>
-                <td>Image</td>
+                <td>Profile Picture</td>
                 <td>
                     <?php
                     if (!empty($image)) {

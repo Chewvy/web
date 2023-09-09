@@ -6,12 +6,10 @@ session_start();
 <html>
 
 <head>
-    <title>PDO - Read Records - PHP CRUD Tutorial</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Latest compiled and minified Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous">
-</head>
+<title>PDO - Read Order Details - PHP CRUD Tutorial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script></head>
+
 
 <body>
     <?php
@@ -40,23 +38,30 @@ session_start();
         $query = "SELECT customer_id, username, image, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status FROM customer
             ORDER BY customer_id ASC";
 
-        if ($_GET) {
-            $search = $_GET['search'];
+$search = isset($_GET['search']) ? $_GET['search'] : "";
 
-            if (empty($search)) {
-                echo "<div class='alert alert-danger'>Please enter a product keyword</div>";
-            }
+if (!empty($search)) {
+    $query = "SELECT customer_id, image, username, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status FROM customer WHERE 
+    username LIKE '%$search%' OR
+    first_name LIKE '%$search%' OR
+    last_name LIKE '%$search%' OR
+    customer_id LIKE '%$search%'
+    ORDER BY username ASC";
+}
 
-            $query = "SELECT customer_id, image, username, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status FROM customer WHERE 
-            username LIKE '%$search%' OR
-            first_name LIKE '%$search%' OR
-            last_name LIKE '%$search%'
-            ORDER BY username ASC";
-        }
 
         // delete message prompt will be here
+        $action = isset($_GET['action']) ?
+        $_GET['action'] : "";
 
-        // select all data
+        // if it was redirected from delete.php
+
+        if($action=='deleted'){
+
+        echo "<div class='alert
+        alert-success'>Record was deleted.</div>";
+
+        }
 
         $stmt = $con->prepare($query);
         $stmt->execute();
@@ -83,12 +88,9 @@ session_start();
             echo "<th>Date of Birth</th>";
             echo "<th>Registration Date and Time</th>";
             echo "<th>Account Status</th>";
-            echo "<th>Profile</th>";
+            echo "<th>Profile Picture</th>";
             echo "<th>Action</th>";
             echo "</tr>";
-
-
-            // table body will be here
 
             // retrieve our table contents
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -114,7 +116,8 @@ session_start();
                 echo "<a href='customer_update.php?customer_id={$customer_id}' class='btn btn-primary' style='margin-right: 1em;'>Edit</a>";
 
                 // we will use this links on next part of this post
-                echo "<a href='#' onclick='delete_user({$username});'  class='btn btn-danger'>Delete</a>";
+                echo "<a href='customer_delete.php?customer_id={$customer_id}' class='btn btn-danger'>Delete</a>";
+
                 echo "</td>";
                 echo "</tr>";
             }
@@ -133,6 +136,22 @@ session_start();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
     <!-- confirm delete record will be here -->
+    <script type='text/javascript'>
+    // Function to handle the delete button click
+    function delete_user(customer_id) {
+    var answer = confirm('Are you sure?');
+
+    if (answer) {
+        // If the user clicked OK, prevent the default link behavior
+        event.preventDefault();
+
+        // Pass the customer_id to delete.php and execute the delete query
+        window.location = 'customer_delete.php?customer_id=' + customer_id;
+
+        return false; // Prevent further event propagation
+    }
+}
+</script>
 
 </body>
 

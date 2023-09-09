@@ -6,13 +6,10 @@ session_start();
 <html>
 
 <head>
-    <title>PDO - Read Products - PHP CRUD Tutorial</title>
-    <!-- Latest compiled and minified Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</head>
+<title>PDO - Read Order Details - PHP CRUD Tutorial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script></head>
+
 
 <?php
 include 'navbar.php';
@@ -43,17 +40,33 @@ include 'navbar.php';
         ORDER BY id ASC";
 
         // select data from products and join with product_category on categoryID
-        if ($_GET) { // Check if there's a search value
+        // Check if there's a search value in the URL
+        if (isset($_GET['search'])) {
             $search = $_GET['search'];
 
             if (!empty($search)) { // Make sure search value is not empty
                 $query = "SELECT p.id, p.image, p.name, p.categoryID, p.price, p.promotion_price, c.category_name, p.created 
-                FROM products p
-                INNER JOIN product_category c ON p.categoryID = c.categoryID 
-                WHERE p.name LIKE '%$search%'
-                ORDER BY p.id ASC";
+                    FROM products p
+                    INNER JOIN product_category c ON p.categoryID = c.categoryID 
+                    WHERE p.name LIKE '%$search%'
+                    ORDER BY p.id ASC";
             }
         }
+
+
+         // delete message prompt will be here
+         $action = isset($_GET['action']) ?
+         $_GET['action'] : "";
+ 
+         // if it was redirected from delete.php
+ 
+         if($action=='deleted'){
+ 
+         echo "<div class='alert
+         alert-success'>Record was deleted.</div>";
+ 
+         }
+
         $stmt = $con->prepare($query);
         $stmt->execute();
 
@@ -114,7 +127,25 @@ include 'navbar.php';
         ?>
     </div> <!-- end .container -->
 
+     <!-- Latest compiled and minified Bootstrap 5 JS -->
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
     <!-- confirm delete record will be here -->
+    <script type='text/javascript'>
+
+        // confirm record deletion
+
+    function delete_user( id ){
+        var answer = confirm('Are you sure?');
+
+        if (answer){
+        // if user clicked ok,
+        // pass the id to delete.php and execute the delete query
+        window.location = 'product_delete.php?id=' + id;
+        }
+    }
+
+    </script>
 
 </body>
 

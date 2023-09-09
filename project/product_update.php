@@ -7,10 +7,8 @@ session_start();
 
 <head>
     <title>PDO - Update Product - PHP CRUD Tutorial</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script></head>
     <style>
         .m-r-1em {
             margin-right: 1em;
@@ -86,11 +84,11 @@ include 'navbar.php';
                 // posted values
                 $name = strip_tags($_POST['name']);
                 $description = strip_tags($_POST['description']);
-                $price = strip_tags($_POST['price']);
+                $price = floatval(str_replace("RM", "", $row['price']));
                 $promotion_price = ($_POST['promotion_price'] !== '') ? strip_tags($_POST['promotion_price']) : null;
                 $manufacture_date = strip_tags($_POST['manufacture_date']);
-                $expire_date = strip_tags($_POST['expire_date']);
-                $categoryID = $_POST['category']; // Get categoryID from the form
+                $expire_date =!empty($_POST['expire_date']) ? strip_tags($_POST['expire_date']) : NULL;
+                $submitted_categoryID = $_POST['category']; // Get categoryID from the form
 
                 // Handle image upload
                 $image = $_FILES['image']['name'];
@@ -117,6 +115,8 @@ include 'navbar.php';
                 if (empty($price)) {
                     echo "<div class='alert alert-danger'>Please enter a price</div>";
                     $flag = false;
+                }else{
+                    $formatted_price = sprintf("%.2f", $price);
                 }
 
                 // Check if promotion_price is not empty and is a number
@@ -130,34 +130,32 @@ include 'navbar.php';
                     } elseif ($promotion_price_numeric > $price) {
                         echo "<div class='alert alert-danger'>Promotion price must be lower than the original price</div>";
                         $flag = false;
-                    } else {
-                        // Store the promotion_price with "RM" prefix
-                        $promotion_price = 'RM ' . $promotion_price_numeric;
                     }
                 } else {
-                    $promotion_price = 'RM 0.00'; // Set a default value with "RM" prefix
+                    $promotion_price = '0.00'; // Set a default value with "RM" prefix
                 }
 
                 if (empty($manufacture_date)) {
                     echo "<div class='alert alert-danger'>Please select a manufacture date</div>";
                     $flag = false;
-                } elseif ($manufacture_date > $expire_date) {
-                    echo "<div class='alert alert-danger'>Manufacture date must be earlier than the expire date</div>";
-                    $flag = false;
-                }
+                 } //elseif ($manufacture_date > $expire_date) {
+                //     echo "<div class='alert alert-danger'>Manufacture date must be earlier than the expire date</div>";
+                //     $flag = false;
+                // }
 
-                if (empty($expire_date)) {
-                    echo "<div class='alert alert-danger'>Please select an expire date</div>";
-                    $flag = false;
-                } elseif ($expire_date < $manufacture_date) {
-                    echo "<div class='alert alert-danger'>Expire date must be later than the manufacture date</div>";
-                    $flag = false;
+                if (!empty($expire_date)) {
+                    if ($expire_date < $manufacture_date) {
+                        echo "<div class='alert alert-danger'>Expire date must be later than the manufacture date</div>";
+                        $flag = false;
+                        }
+                }else{
+                    $expire_date == NULL;
                 }
 
               // Check if a new image is uploaded
               if (!empty($_FILES['image']['name'])) {
                 $image_temp = $_FILES['image']['tmp_name'];
-                $image_info = getimagesize($image_temp);
+                $image_info = getimagesize($image_temp);//image temporary store
                 $image_width = $image_info[0];
                 $image_height = $image_info[1];
                 
@@ -253,9 +251,9 @@ include 'navbar.php';
                             $categoryStmt = $con->prepare($categoryQuery);
                             $categoryStmt->execute();
 
-                            while ($categoryRow = $categoryStmt->fetch(PDO::FETCH_ASSOC)) {
-                                extract($categoryRow);
-                                $selected = ($categoryID == (isset($categoryID) ? $categoryID : $categoryID)) ? 'selected' : '';
+                            while ($row1 = $categoryStmt->fetch(PDO::FETCH_ASSOC)) {
+                                extract($row1);
+                                $selected = ($categoryID == (isset($submitted_categoryID)? $submitted_categoryID : $row['categoryID'])) ? 'selected' : '';
                                 echo "<option value='$categoryID' $selected>$category_name</option>";
                             }
                             ?>
@@ -263,13 +261,13 @@ include 'navbar.php';
                     </td>
                 </tr>
                 <tr>
-                    <td>Price</td>
-                    <td colspan="2"><input type='text' name='price'
-                            value="<?php echo htmlspecialchars($price, ENT_QUOTES); ?>" class='form-control' /></td>
+                    <td>Price (RM)</td>
+                    <td><input type='text' name='price'
+                            value="<?php echo htmlspecialchars($price, ENT_QUOTES).".00" ;?>" class='form-control' /></td>
                 </tr>
                 <tr>
-                    <td>Promotion Price</td>
-                    <td colspan="2"><input type='text' name='promotion_price'
+                    <td>Promotion Price (RM)</td>
+                    <td><input type='text' name='promotion_price'
                             value="<?php echo htmlspecialchars($promotion_price, ENT_QUOTES); ?>"
                             class='form-control' /></td>
                 </tr>
@@ -280,23 +278,30 @@ include 'navbar.php';
                 <tr>
                     <td>Photo</td>
                     <td><input type="file" name="image" />
+                    <?php
+                    if (!empty($image)) {
+                        echo "<img src='image/$image' alt='Product Image' style='max-width: 100px;' />";
+                    } else {
+                        echo "<img src='ProductComingSoon.jpg/$image' alt='Product Coming Soon' style='max-width: 100px;' />";
+                    }
+                    ?>
                     </td>
                 </tr>
                 <tr>
                     <td>Manufacture Date</td>
-                    <td colspan="2"><input type='date' name='manufacture_date'
+                    <td><input type='date' name='manufacture_date'
                             class='form-control' value="<?php echo isset($manufacture_date) ? $manufacture_date : ''; ?>">
                     </td>
                 </tr>
                 <tr>
                     <td>Expire Date</td>
-                    <td colspan="2"><input type='date' name='expire_date'
+                    <td><input type='date' name='expire_date'
                             class='form-control' value="<?php echo isset($expire_date) ? $expire_date : ''; ?>">
                     </td>
                 </tr>
                 <tr>
                     <td></td>
-                    <td colspan="2"><input type='submit' value='Save Changes' class='btn btn-primary' /> <a
+                    <td><input type='submit' value='Save Changes' class='btn btn-primary' /> <a
                             href='product_index.php' class='btn btn-danger'>Back to read products</a></td>
                 </tr>
             </table>

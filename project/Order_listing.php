@@ -8,16 +8,13 @@ session_start();
 <head>
     <title>PDO - Create a Record - PHP CRUD Tutorial</title>
     <!-- Latest compiled and minified Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script></head>
 
 <body>
-    <?php
-    include 'navbar.php';
-    ?>
+<?php
+include 'navbar.php';
+?>
     <!-- container -->
     <div class="container">
         <div class="page-header">
@@ -37,9 +34,9 @@ session_start();
         // Include database connection
         include 'config_folder/database.php';
 
-        if ($_GET) { // Check if there's a search value
+        if (isset($_GET['search'])) {
             $search = $_GET['search'];
-
+        
             if (!empty($search)) { // Make sure search value is not empty
                 $query = "SELECT os.order_id, c.username, c.first_name, c.last_name
                 FROM order_summary os
@@ -57,6 +54,19 @@ session_start();
                 FROM order_summary os
                 INNER JOIN customer c ON c.customer_id = os.customer_id 
                 ORDER BY os.order_id ASC";
+        }
+
+        // delete message prompt will be here
+        $action = isset($_GET['action']) ?
+        $_GET['action'] : "";
+
+        // if it was redirected from delete.php
+
+        if($action=='deleted'){
+
+        echo "<div class='alert
+        alert-success'>Record was deleted.</div>";
+
         }
 
         $stmt = $con->prepare($query);
@@ -130,7 +140,8 @@ session_start();
                 echo "<td>";
                 echo "<a href='order_details.php?order_id={$order_id}' class='btn btn-info m-r-1em'>Read</a>";
                 echo "<a href='#' class='btn btn-primary m-r-1em'>Edit</a>";
-                echo "<a href='#' onclick='delete_order({$order_id});' class='btn btn-danger'>Delete</a>";
+                echo "<a href='Order_delete.php?order_id={$order_id}' onclick='return confirm(\"Are you sure you want to delete this order?\");' class='btn btn-danger'>Delete</a>";
+                
                 echo "</td>";
                 echo "</tr>";
             }
@@ -141,6 +152,25 @@ session_start();
         }
         ?>
     </div> <!-- end .container -->
+
+        <!-- Latest compiled and minified Bootstrap 5 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+    <script type='text/javascript'>
+    // Function to handle the delete button click
+    function delete_order(order_id) {
+        var answer = confirm('Are you sure you want to delete this order?');
+
+        if (answer) {
+            // If the user clicked OK, navigate to the delete.php page with the order_id parameter
+            window.location = 'Order_delete.php?order_id=' + order_id;
+        }
+
+        return false; // Prevent further event propagation
+    }
+</script>
+
+
 </body>
 
 </html>

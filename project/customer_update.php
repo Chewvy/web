@@ -137,13 +137,14 @@ include 'navbar.php';
                     $flag = false;
                 }
 
-               // Check if a new image is uploaded
                 if (!empty($_FILES['image']['name'])) {
                     $image_temp = $_FILES['image']['tmp_name'];
                     $image_info = getimagesize($image_temp);
+                    $image_width = $image_info[0];
+                    $image_height = $image_info[1];
                     
                     // Check if the uploaded image is square (same width and height)
-                    if ($image_info[0] != $image_info[1]) {
+                    if ($image_width != $image_height) {
                         echo "<div class='alert alert-danger'>Please upload a square image.</div>";
                         $flag = false;
                     }
@@ -292,7 +293,14 @@ include 'navbar.php';
                             </tr>
                             <tr>
                                 <td>Photo</td>
-                                <td><input type="file" name="image" /></td>
+                                <td><input type="file" name="image" />
+                                <?php
+                                    if (!empty($image)) {
+                                        echo "<img src='image/$image' alt='User Image' style='max-width: 100px;' />";
+                                    } else {
+                                        echo "<img src='default.jpg/$image' alt='Default' style='max-width: 100px;' />";
+                                    }
+                                ?></td>
                             </tr>
                             <tr>
                                 <td colspan="2" class="text-center">

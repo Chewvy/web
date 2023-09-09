@@ -5,12 +5,9 @@ session_start();
 <html>
 
 <head>
-    <title>PDO - Create a Record - PHP CRUD Tutorial</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-</head>
+<title>PDO - Read Order Details - PHP CRUD Tutorial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script></head>
 
 <body>
 <?php
@@ -37,7 +34,7 @@ include 'navbar.php';
                 $image = !empty($_FILES["image"]["name"]) ? sha1_file($_FILES['image']['tmp_name']) . "-" . basename($_FILES["image"]["name"]) : "";
                 $image = htmlspecialchars(strip_tags($image));
                 $manufacture_date = strip_tags($_POST['manufacture_date']);
-                $expire_date = strip_tags($_POST['expire_date']);
+                $expire_date = !empty($_POST['expire_date']) ? strip_tags($_POST['expire_date']) : NULL;
                 $categoryID = $_POST['categoryID']; // Get categoryID from the form
 
                 // Execute the query
@@ -77,57 +74,66 @@ include 'navbar.php';
                 if (empty($manufacture_date)) {
                     echo "<div class='alert alert-danger'>Please select a manufacture date</div>";
                     $flag = false;
-                } else if ($manufacture_date > $expire_date) {
-                    echo "<div class='alert alert-danger'>Manufacture date must be earlier than expire date</div>";
-                    $flag = false;
+                 } //else if ($manufacture_date > $expire_date) {
+                //     echo "<div class='alert alert-danger'>Manufacture date must be earlier than expire date</div>";
+                //     $flag = false;
+                // }
+
+                if (!empty($expire_date)) {
+                    if ($expire_date < $manufacture_date) {
+                        echo "<div class='alert alert-danger'>Expire date must be later than the manufacture date</div>";
+                        $flag = false;
+                        }
+                }else{
+                    $expire_date == NULL;
                 }
 
-                $image = "";//empty string
+                $image = ""; // empty string
 
-                    // Check if an image was uploaded
-                    if (!empty($_FILES["image"]["name"])) {//if its true then check
-                        // Get image information
-                        $image_name = $_FILES["image"]["name"];
-                        $image_size = $_FILES["image"]["size"];
-                        $image_type = $_FILES["image"]["type"];
-                        $image_tmp_name = $_FILES["image"]["tmp_name"];//extract information
-    
-                        // Check if the uploaded file is an image
-                        $allowed_file_types = array("image/jpeg", "image/jpg", "image/png", "image/gif");
-                        if (in_array($image_type, $allowed_file_types)) {//如果有meet requirement就会写true,别人就是false
-                            // Check if it's a square image (width and height are equal)
-                            $image_info = getimagesize($image_tmp_name);
-                            $image_width = $image_info[0];//check width and height
-                            $image_height = $image_info[1];
-    
-                            if ($image_width == $image_height) {
-                                // Check if image size does not exceed 512KB
-                                if ($image_size <= 512 * 1024) {
-                                    // Generate a unique name for the image using SHA1
-                                    $image = sha1_file($image_tmp_name) . "-" . $image_name;
-    
-                                    // Move the uploaded image to the destination folder
-                                    $upload_dir = "image/";
-                                    $target_file = $upload_dir . $image;
-    
-                                    if (move_uploaded_file($image_tmp_name, $target_file)) {
-                                        // Image uploaded successfully
-                                    } else {
-                                        echo "<div class='alert alert-danger'>Unable to upload the image.</div>";
-                                    }
+                // Check if an image was uploaded
+                if (!empty($_FILES["image"]["name"])) { // if its true then check
+                    // Get image information
+                    $image_name = $_FILES["image"]["name"];
+                    $image_size = $_FILES["image"]["size"];
+                    $image_type = $_FILES["image"]["type"];
+                    $image_tmp_name = $_FILES["image"]["tmp_name"]; // extract information
+
+                    // Check if the uploaded file is an image
+                    $allowed_file_types = array("image/jpeg", "image/jpg", "image/png", "image/gif");
+                    if (in_array($image_type, $allowed_file_types)) { // 如果有meet requirement就会写true,别人就是false
+                        // Check if it's a square image (width and height are equal)
+                        $image_info = getimagesize($image_tmp_name);
+                        $image_width = $image_info[0]; // check width and height
+                        $image_height = $image_info[1];
+
+                        if ($image_width == $image_height) {
+                            // Check if image size does not exceed 512KB
+                            if ($image_size <= 512 * 1024) {
+                                // Generate a unique name for the image using SHA1
+                                $image = sha1_file($image_tmp_name) . "-" . $image_name;
+
+                                // Move the uploaded image to the destination folder
+                                $upload_dir = "image/";
+                                $target_file = $upload_dir . $image;
+
+                                if (move_uploaded_file($image_tmp_name, $target_file)) {
+                                    // Image uploaded successfully
                                 } else {
-                                    echo "<div class='alert alert-danger'>Image size must be less than or equal to 512KB.</div>";
+                                    echo "<div class='alert alert-danger'>Unable to upload the image.</div>";
                                 }
                             } else {
-                                echo "<div class='alert alert-danger'>Image must be square (same width and height).</div>";
+                                echo "<div class='alert alert-danger'>Image size must be less than or equal to 512KB.</div>";
                             }
                         } else {
-                            echo "<div class='alert alert-danger'>Invalid image format. Supported formats: JPG, JPEG, PNG, GIF.</div>";
+                            echo "<div class='alert alert-danger'>Image must be square (same width and height).</div>";
                         }
                     } else {
-                        // If no image was uploaded, use the default image
-                        $image = "ProductComingSoon.jpg";
+                        echo "<div class='alert alert-danger'>Invalid image format. Supported formats: JPG, JPEG, PNG, GIF.</div>";
                     }
+                } else {
+                    // If no image was uploaded, use the default image
+                    $image = "ProductComingSoon.jpg";
+                }
 
                 // now, if image is not empty
                 if ($flag) {
