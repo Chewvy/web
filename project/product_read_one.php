@@ -42,6 +42,20 @@ include 'navbar.php';
             // create a new PDO statement
             $stmt = $con->prepare($query);
 
+            // delete message prompt will be here
+            $action = isset($_GET['action']) ?
+            $_GET['action'] : "";
+
+            // if it was redirected from delete.php
+
+            if($action=='deleted'){
+            echo "<div class='alert alert-success'>Record was deleted.</div>";
+            }
+
+            if ($action == 'UnableDelete') {
+                echo "<div class='alert alert-danger'>Unable to delete the product because it has orders associated with it.</div>";
+            }
+            
             // this is the first question mark
             $stmt->bindParam(1, $id);
 
@@ -109,6 +123,12 @@ include 'navbar.php';
                 </td>
             </tr>
             <tr>
+                <td>Expire Date</td>
+                <td>
+                    <?php echo htmlspecialchars($expire_date, ENT_QUOTES); ?>
+                </td>
+            </tr>
+            <tr>
                 <td>Image</td>
                 <td>
                     <?php
@@ -121,21 +141,35 @@ include 'navbar.php';
                 </td>
             </tr>
             <tr>
-                <td>Expire Date</td>
-                <td>
-                    <?php echo htmlspecialchars($expire_date, ENT_QUOTES); ?>
-                </td>
-            </tr>
-            <tr>
                 <td></td>
                 <td>
-                    <a href='product_update.php' class='btn btn-primary m-r-1em'>Edit</a>
-                    <a href='product_index.php' class='btn btn-danger'>Back to read products</a>
+                <a href='product_update.php?id=<?php echo $id; ?>' class='btn btn-warning m-r-1em'>Edit</a>
+                <a href='product_index.php' class='btn btn-primary'>Back to read products</a>
+                <a href='Order_delete.php?order_id=<?php echo $id; ?>' onclick='return confirm("Are you sure you want to delete this order?");' class='btn btn-danger'>Delete</a>
                 </td>
             </tr>
         </table>
 
     </div> <!-- end .container -->
+   <!-- Latest compiled and minified Bootstrap 5 JS -->
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+        <!-- confirm delete record will be here -->
+    <script type='text/javascript'>
+
+// confirm record deletion
+
+function delete_user( id ){
+var answer = confirm('Are you sure?');
+
+if (answer){
+// if user clicked ok,
+// pass the id to delete.php and execute the delete query
+window.location = 'product_delete.php?id=' + id;
+}
+}
+
+</script>
 
 </body>
 

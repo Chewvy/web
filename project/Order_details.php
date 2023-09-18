@@ -39,6 +39,20 @@ include 'navbar.php';
             $Detail_stmt->execute();
             $Detail_num = $Detail_stmt->rowCount();
 
+            
+        // delete message prompt will be here
+        $action = isset($_GET['action']) ?
+        $_GET['action'] : "";
+
+        // if it was redirected from delete.php
+
+        if($action=='deleted'){
+
+        echo "<div class='alert
+        alert-success'>Record was deleted.</div>";
+
+        }
+
             // Check if there are any details for this order ID
             if ($Detail_num > 0) {
                 $Detail_row = $Detail_stmt->fetch(PDO::FETCH_ASSOC);
@@ -118,7 +132,9 @@ include 'navbar.php';
                 echo "</table>";
 
                 echo "<div class='text-end'>";
-                echo "<a href='Order_listing.php' class='btn btn-danger'>Back to Order List</a>";
+                echo "<a href='Order_listing.php' class='btn btn-primary' style='margin-right: 0.3em;'>Back to Order List</a>";
+                echo "<a href='#' onclick='delete_order({$order_id});' class='btn btn-danger'>Delete</a>";
+
                 echo "</div>";
             } else {
                 echo "No details found for this order ID.";
@@ -128,6 +144,24 @@ include 'navbar.php';
         }
         ?>
     </div> <!-- end .container -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+
+        <script type='text/javascript'>
+    // Function to handle the delete button click
+    function delete_order(order_id) {
+        var answer = confirm('Are you sure you want to delete this order?');
+
+        if (answer) {
+            // If the user clicked OK, navigate to the delete.php page with the order_id parameter
+            window.location = 'Order_delete.php?order_id=' + order_id;
+        }
+
+        return false; // Prevent further event propagation
+    }
+</script>
 </body>
 
 </html>

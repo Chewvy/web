@@ -18,8 +18,8 @@ try {
 
     if ($order_count > 0) {
         // If there are orders associated with the product, show a message
-        echo 'Unable to delete the customer because it has orders associated with it. <a href="customer_index.php" class="btn btn-primary">OK</a>';
-    } else {
+        header('Location: product_index.php?action=UnableDelete');  
+        } else {
         // Delete query
         $delete_query = "DELETE FROM customer WHERE customer_id = ?";
         $delete_stmt = $con->prepare($delete_query);

@@ -1,7 +1,4 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <!-- Latest compiled and minified Bootstrap CSS -->
-    <?php
+<?php
 // Include database connection
 include 'config_folder/database.php';
 
@@ -18,7 +15,8 @@ try {
 
     if ($order_count > 0) {
         // If there are orders associated with the product, show a message
-        echo 'Unable to delete the product because it has orders associated with it. <a href="product_index.php" class="btn btn-primary">OK</a>';
+        header('Location: product_index.php?action=UnableDelete');    
+    
     } else {
         // Delete query
         $delete_query = "DELETE FROM products WHERE id = ?";

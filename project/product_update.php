@@ -1,5 +1,7 @@
 <?php
 session_start();
+
+$defaultImage = 'ProductComingSoon.jpg';
 ?>
 
 <!DOCTYPE HTML>
@@ -7,8 +9,12 @@ session_start();
 
 <head>
     <title>PDO - Update Product - PHP CRUD Tutorial</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script></head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+        crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
     <style>
         .m-r-1em {
             margin-right: 1em;
@@ -25,13 +31,17 @@ session_start();
         .mt0 {
             margin-top: 0;
         }
+
+        .image {
+            margin-bottom: 1em;
+        }
     </style>
 </head>
 
 <?php
 include 'navbar.php';
 ?>
- 
+
 <body>
     <div class="container">
         <div class="page-header">
@@ -84,11 +94,13 @@ include 'navbar.php';
                 // posted values
                 $name = strip_tags($_POST['name']);
                 $description = strip_tags($_POST['description']);
-                $price = floatval(str_replace("RM", "", $row['price']));
+                $price = floatval(str_replace("RM", "", $_POST['price']));
                 $promotion_price = ($_POST['promotion_price'] !== '') ? strip_tags($_POST['promotion_price']) : null;
                 $manufacture_date = strip_tags($_POST['manufacture_date']);
-                $expire_date =!empty($_POST['expire_date']) ? strip_tags($_POST['expire_date']) : NULL;
+                $expire_date = !empty($_POST['expire_date']) ? strip_tags($_POST['expire_date']) : NULL;
                 $submitted_categoryID = $_POST['category']; // Get categoryID from the form
+
+                $flag = true;
 
                 // Handle image upload
                 $image = $_FILES['image']['name'];
@@ -96,10 +108,52 @@ include 'navbar.php';
                 // Define a default image filename
                 $defaultImage = 'ProductComingSoon.jpg';
 
+                // Check if a new image is uploaded
+                if (!empty($_FILES['image']['name'])) {
+                    $image_temp = $_FILES['image']['tmp_name'];
+                    $image_info = getimagesize($image_temp); //image temporary store
+                    $image_width = $image_info[0];
+                    $image_height = $image_info[1];
 
-                // Execute the query
-                $flag = true;
+                    // Check if the uploaded image is square (same width and height)
+                    if ($image_width == $image_height) {
+                        echo "<div class='alert alert-danger'>Please upload a square image.</div>";
+                        $flag = false;
+                    }
 
+                    // Check if the file size is within the allowed limit (512KB)
+                    if ($_FILES['image']['size'] > 512 * 1024) {
+                        echo "<div class='alert alert-danger'>Image size exceeds the allowed limit (512KB).</div>";
+                        $flag = false;
+                    }
+
+                    if ($flag) {
+                        // Move the new image to the destination folder
+                        move_uploaded_file($image_temp, "image/$image");
+                    }
+                } else {
+                    if (empty($row['image'])) {
+                        // If no new image is uploaded and no previous image exists, set the image to the default image filename
+                        $image = $defaultImage;
+                    } else {
+                        // If no new image is uploaded but a previous image exists, retain the old image filename
+                        $image = $row['image'];
+                    }
+                }
+                // Check if the "delete_image" checkbox is checked
+                if (isset($_POST['delete_image']) && $_POST['delete_image'] == 1) {
+                    // Delete the current image file
+                    if (!empty($image) && $image !== $defaultImage) {
+                        $image_path = 'image/' . $image;
+                        if (file_exists($image_path)) {
+                            unlink($image_path);
+                        }
+                        
+                        // Set the image to the default image filename
+                        $image = $defaultImage;
+                    }
+                }
+       
                 if (empty($name)) {
                     echo "<div class='alert alert-danger'>Please enter the product name</div>";
                     $flag = false;
@@ -115,7 +169,7 @@ include 'navbar.php';
                 if (empty($price)) {
                     echo "<div class='alert alert-danger'>Please enter a price</div>";
                     $flag = false;
-                }else{
+                } else {
                     $formatted_price = sprintf("%.2f", $price);
                 }
 
@@ -138,60 +192,10 @@ include 'navbar.php';
                 if (empty($manufacture_date)) {
                     echo "<div class='alert alert-danger'>Please select a manufacture date</div>";
                     $flag = false;
-                 } //elseif ($manufacture_date > $expire_date) {
-                //     echo "<div class='alert alert-danger'>Manufacture date must be earlier than the expire date</div>";
-                //     $flag = false;
-                // }
-
-                if (!empty($expire_date)) {
-                    if ($expire_date < $manufacture_date) {
-                        echo "<div class='alert alert-danger'>Expire date must be later than the manufacture date</div>";
-                        $flag = false;
-                        }
-                }else{
-                    $expire_date == NULL;
-                }
-
-              // Check if a new image is uploaded
-              if (!empty($_FILES['image']['name'])) {
-                $image_temp = $_FILES['image']['tmp_name'];
-                $image_info = getimagesize($image_temp);//image temporary store
-                $image_width = $image_info[0];
-                $image_height = $image_info[1];
-                
-                // Check if the uploaded image is square (same width and height)
-                if ($image_width == $image_height) {
-                    echo "<div class='alert alert-danger'>Please upload a square image.</div>";
+                } elseif (!empty($expire_date) && $expire_date < $manufacture_date) {
+                    echo "<div class='alert alert-danger'>Expire date must be later than the manufacture date</div>";
                     $flag = false;
                 }
-                
-                // Check if the file size is within the allowed limit (512KB)
-                if ($_FILES['image']['size'] > 512 * 1024) {
-                    echo "<div class='alert alert-danger'>Image size exceeds the allowed limit (512KB).</div>";
-                    $flag = false;
-                }
-                
-                if ($flag) {
-                    // Move the new image to the destination folder
-                    move_uploaded_file($image_temp, "image/$image");
-                }
-            } elseif (isset($_POST['delete_image']) && $_POST['delete_image'] == 1) {
-                // User wants to delete the current image
-                if (!empty($row['image']) && file_exists("image/" . $row['image'])) {
-                    unlink("image/" . $row['image']);
-                }
-                $image = $defaultImage; // Set the image to the default image filename
-            } else {
-                // If no new image is uploaded and no deletion requested, retain the old image filename
-                $image = $row['image'];
-
-                // Check if the image is empty (no new image and no deletion)
-                if (empty($image)) {
-                    // Set the image to the default image filename
-                    $image = $defaultImage;
-                }
-            }
-
 
                 if ($flag) {
                     // Update query
@@ -203,12 +207,12 @@ include 'navbar.php';
                     // Bind the parameters
                     $stmt->bindParam(':name', $name);
                     $stmt->bindParam(':description', $description);
-                    $stmt->bindParam(':price', $price);
+                    $stmt->bindParam(':price', $formatted_price);
                     $stmt->bindParam(':promotion_price', $promotion_price, PDO::PARAM_STR);
                     $stmt->bindParam(':image', $image);
                     $stmt->bindParam(':manufacture_date', $manufacture_date);
                     $stmt->bindParam(':expire_date', $expire_date);
-                    $stmt->bindParam(':categoryID', $categoryID);
+                    $stmt->bindParam(':categoryID', $submitted_categoryID);
                     $stmt->bindParam(':id', $id);
 
                     // Execute the query
@@ -230,7 +234,8 @@ include 'navbar.php';
             <table class='table table-hover table-responsive table-bordered'>
                 <tr>
                     <td>Name</td>
-                    <td><input type='text' name='name' value="<?php echo htmlspecialchars($name, ENT_QUOTES); ?>"
+                    <td><input type='text' name='name'
+                            value="<?php echo htmlspecialchars($name, ENT_QUOTES); ?>"
                             class='form-control' /></td>
                 </tr>
                 <tr>
@@ -246,14 +251,14 @@ include 'navbar.php';
                             <option value="">Select a Category</option>
 
                             <?php
-                            // Fetch product categories from database and populate the dropdown
+                            // Fetch product categories from the database and populate the dropdown
                             $categoryQuery = "SELECT categoryID, category_name FROM product_category";
                             $categoryStmt = $con->prepare($categoryQuery);
                             $categoryStmt->execute();
 
                             while ($row1 = $categoryStmt->fetch(PDO::FETCH_ASSOC)) {
                                 extract($row1);
-                                $selected = ($categoryID == (isset($submitted_categoryID)? $submitted_categoryID : $row['categoryID'])) ? 'selected' : '';
+                                $selected = ($categoryID == (isset($submitted_categoryID) ? $submitted_categoryID : $row['categoryID'])) ? 'selected' : '';
                                 echo "<option value='$categoryID' $selected>$category_name</option>";
                             }
                             ?>
@@ -263,7 +268,8 @@ include 'navbar.php';
                 <tr>
                     <td>Price (RM)</td>
                     <td><input type='text' name='price'
-                            value="<?php echo htmlspecialchars($price, ENT_QUOTES).".00" ;?>" class='form-control' /></td>
+                            value="<?php echo htmlspecialchars("RM" . number_format($price, 2), ENT_QUOTES); ?>"
+                            class='form-control' /></td>
                 </tr>
                 <tr>
                     <td>Promotion Price (RM)</td>
@@ -273,30 +279,41 @@ include 'navbar.php';
                 </tr>
                 <tr>
                     <td>Delete Current Image</td>
-                    <td><input type="checkbox" name="delete_image" value="1" /> Check this to delete the current image</td>
+                    <td>
+                        <?php
+                        if (!empty($image) && $image !== $defaultImage) {
+                            echo "<input type='checkbox' name='delete_image' value='1' /> Check this to delete the current image";
+                        }
+                        ?>
+                    </td>
                 </tr>
                 <tr>
                     <td>Photo</td>
-                    <td><input type="file" name="image" />
-                    <?php
-                    if (!empty($image)) {
-                        echo "<img src='image/$image' alt='Product Image' style='max-width: 100px;' />";
-                    } else {
-                        echo "<img src='ProductComingSoon.jpg/$image' alt='Product Coming Soon' style='max-width: 100px;' />";
-                    }
-                    ?>
+                    <td>
+                        <div class="image">
+                            <input type="file" name="image" id="image" /><br>
+                            <?php
+                            if (!empty($image)) {
+                                echo "<img src='image/$image' alt='Product Image' style='max-width: 100px;' />";
+                            } else {
+                                echo "<img src='$defaultImage' alt='Product Coming Soon' style='max-width: 100px;' />";
+                            }
+                            ?>
+                        </div>
                     </td>
                 </tr>
                 <tr>
                     <td>Manufacture Date</td>
                     <td><input type='date' name='manufacture_date'
-                            class='form-control' value="<?php echo isset($manufacture_date) ? $manufacture_date : ''; ?>">
+                            class='form-control'
+                            value="<?php echo isset($manufacture_date) ? $manufacture_date : ''; ?>">
                     </td>
                 </tr>
                 <tr>
                     <td>Expire Date</td>
                     <td><input type='date' name='expire_date'
-                            class='form-control' value="<?php echo isset($expire_date) ? $expire_date : ''; ?>">
+                            class='form-control'
+                            value="<?php echo isset($expire_date) ? $expire_date : ''; ?>">
                     </td>
                 </tr>
                 <tr>
@@ -308,6 +325,10 @@ include 'navbar.php';
         </form>
     </div>
     <!-- end .container -->
+    
+     <!-- Latest compiled and minified Bootstrap 5 JS -->
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
 </body>
 
 </html>

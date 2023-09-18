@@ -36,31 +36,33 @@ session_start();
         include 'config_folder/database.php';
 
         $query = "SELECT customer_id, username, image, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status FROM customer
-            ORDER BY customer_id ASC";
+            ORDER BY customer_id DESC";
 
-$search = isset($_GET['search']) ? $_GET['search'] : "";
-
-if (!empty($search)) {
-    $query = "SELECT customer_id, image, username, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status FROM customer WHERE 
-    username LIKE '%$search%' OR
-    first_name LIKE '%$search%' OR
-    last_name LIKE '%$search%' OR
-    customer_id LIKE '%$search%'
-    ORDER BY username ASC";
-}
-
-
-        // delete message prompt will be here
-        $action = isset($_GET['action']) ?
-        $_GET['action'] : "";
-
+        $action = isset($_GET['action']) ? $_GET['action'] : "";
         // if it was redirected from delete.php
+        if ($action == 'deleted') {
+            echo "<div class='alert alert-success'>Record was deleted.</div>";
+        }
 
-        if($action=='deleted'){
+        if ($action == 'UnableDelete') {
+            echo "<div class='alert alert-danger'>Unable to delete the product because it has orders associated with it.</div>";
+        }
 
-        echo "<div class='alert
-        alert-success'>Record was deleted.</div>";
+        if (isset($_GET['search'])) {
+            $search = $_GET['search'];
 
+            if (!empty($search)) {
+                $query = "SELECT customer_id, image, username, email, first_name, last_name, gender, DOB, registration_date_and_time, account_status 
+                          FROM customer 
+                          WHERE 
+                            customer_id LIKE '%$search%' OR
+                            first_name LIKE '%$search%' OR
+                            last_name LIKE '%$search%'
+                          ORDER BY customer_id ASC";
+            } else {
+                echo "<div class='alert alert-danger'>Please fill in keywords to search.</div>";
+            }
+            
         }
 
         $stmt = $con->prepare($query);
@@ -81,14 +83,10 @@ if (!empty($search)) {
             echo "<tr>";
             echo "<th>ID</th>";
             echo "<th>Username</th>";
-            echo "<th>Email</th>";
             echo "<th>First Name</th>";
             echo "<th>Last Name</th>";
             echo "<th>Gender</th>";
-            echo "<th>Date of Birth</th>";
             echo "<th>Registration Date and Time</th>";
-            echo "<th>Account Status</th>";
-            echo "<th>Profile Picture</th>";
             echo "<th>Action</th>";
             echo "</tr>";
 
@@ -100,23 +98,21 @@ if (!empty($search)) {
                 // creating new table row per record
                 echo "<tr>";
                 echo "<td>{$customer_id}</td>";
-                echo "<td>{$username}</td>";
-                echo "<td>{$email}</td>";
+                echo "<td><strong>{$username}</strong><br>
+                <img src='image/" . (!empty($image) ? htmlspecialchars($image, ENT_QUOTES) : 'default.jpg') . "' alt='{$username}' class='img-thumbnail' style='max-width: 100px; max-height: 100px;'></td>";
                 echo "<td>{$first_name}</td>";
                 echo "<td>{$last_name}</td>";
                 echo "<td>{$gender}</td>";
-                echo "<td>{$DOB}</td>";
                 echo "<td>{$registration_date_and_time}</td>";
-                echo "<td>{$account_status}</td>";
-                echo "<td><img src='image/" . (!empty($image) ? htmlspecialchars($image, ENT_QUOTES) : 'default.jpg') . "' alt='{$username}' class='img-thumbnail' style='max-width: 100px; max-height: 100px;'></td>";                echo "<td>";
+                echo "<td>";
                 // read one record
-                echo "<a href='customer_read_one.php?customer_id={$customer_id}' class='btn btn-info' style='margin-right: 1em;'>Read</a>";
+                echo "<a href='customer_read_one.php?customer_id={$customer_id}' class='btn btn-info' style='margin-right: 0.3em;'>Read</a>";
 
                 // we will use this links on next part of this post
-                echo "<a href='customer_update.php?customer_id={$customer_id}' class='btn btn-primary' style='margin-right: 1em;'>Edit</a>";
+                echo "<a href='customer_update.php?customer_id={$customer_id}' class='btn btn-primary' style='margin-right: 0.3em;'>Edit</a>";
 
                 // we will use this links on next part of this post
-                echo "<a href='customer_delete.php?customer_id={$customer_id}' class='btn btn-danger'>Delete</a>";
+                echo "<a href='#' onclick='delete_user({$customer_id});' class='btn btn-danger'>Delete</a>";
 
                 echo "</td>";
                 echo "</tr>";

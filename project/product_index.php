@@ -37,7 +37,7 @@ include 'navbar.php';
         $query = "SELECT p.id, p.name, p.categoryID, p.price, p.image, p.promotion_price, c.category_name, p.created 
         FROM products p
         INNER JOIN product_category c ON p.categoryID = c.categoryID 
-        ORDER BY id ASC";
+        ORDER BY id DESC";
 
         // select data from products and join with product_category on categoryID
         // Check if there's a search value in the URL
@@ -48,24 +48,30 @@ include 'navbar.php';
                 $query = "SELECT p.id, p.image, p.name, p.categoryID, p.price, p.promotion_price, c.category_name, p.created 
                     FROM products p
                     INNER JOIN product_category c ON p.categoryID = c.categoryID 
-                    WHERE p.name LIKE '%$search%'
+                    WHERE p.id LIKE '%$search%'
                     ORDER BY p.id ASC";
             }
         }
 
 
          // delete message prompt will be here
-         $action = isset($_GET['action']) ?
-         $_GET['action'] : "";
+        $action = isset($_GET['action']) ?
+        $_GET['action'] : "";
  
-         // if it was redirected from delete.php
+        // if it was redirected from delete.php
  
-         if($action=='deleted'){
+        if($action=='deleted'){
  
-         echo "<div class='alert
-         alert-success'>Record was deleted.</div>";
+        echo "<div class='alert
+        alert-success'>Record was deleted.</div>";
  
-         }
+        }
+
+        if($action=='UnableDelete'){
+ 
+        echo "<div class='alert alert-danger'>Unable to delete the product because it has orders associated with it.</div>";
+    
+        }
 
         $stmt = $con->prepare($query);
         $stmt->execute();
@@ -82,9 +88,7 @@ include 'navbar.php';
             echo "<tr>";
             echo "<th>ID</th>";
             echo "<th>Name</th>";
-            echo "<th>Category Name</th>";
             echo "<th>Price</th>";
-            echo "<th>Image</th>";
             echo "<th>Created</th>";
             echo "<th>Action</th>";
             echo "</tr>";
@@ -93,8 +97,10 @@ include 'navbar.php';
                 extract($row);
                 echo "<tr>";
                 echo "<td>{$id}</td>";
-                echo "<td>{$name}</td>";
-                echo "<td>{$category_name}</td>";
+                echo "<td>";
+                echo "<strong>{$name}</strong><br>";
+                echo "<img src='image/{$image}' alt='{$name}' class='img-thumbnail' style='max-width: 100px; max-height: 100px;'><br>";
+                echo "</td>";
 
                 echo "<td>";
                 $priceWithoutCurrency = floatval(str_replace("RM", "", $price));
@@ -107,14 +113,18 @@ include 'navbar.php';
                 }
                 echo $formattedPrice;
                 echo "</td>";
-                echo "<td><img src='image/{$image}' alt='{$name}' class='img-thumbnail' style='max-width: 100px; max-height: 100px;'></td>";
 
                 echo "<td>{$created}</td>";
 
                 echo "<td>";
-                echo "<a href='product_read_one.php?id={$id}' class='btn btn-info m-r-1em'>Read</a>";
-                echo "<a href='product_update.php?id={$id}' class='btn btn-primary m-r-1em'>Edit</a>";
-                echo "<a href='#' onclick='delete_user({$id});' class='btn btn-danger'>Delete</a>";
+                // read one record
+                echo "<a href='product_read_one.php?id={$id}' class='btn btn-info' style='margin-right: 0.3em;'>Read</a>";
+
+                // we will use this links on next part of this post
+                echo "<a href='product_update.php?id={$id}' class='btn btn-primary' style='margin-right: 0.3em;'>Edit</a>";
+
+                // we will use this links on next part of this post
+                echo "<a href='#' onclick='delete_product({$id});' class='btn btn-danger'>Delete</a>";
                 echo "</td>";
                 echo "</tr>";
             }
@@ -135,7 +145,7 @@ include 'navbar.php';
 
         // confirm record deletion
 
-    function delete_user( id ){
+    function delete_product( id ){
         var answer = confirm('Are you sure?');
 
         if (answer){
