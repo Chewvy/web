@@ -26,7 +26,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="create_customer.php" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Customer
+                        Customers
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
                         <li><a class="dropdown-item" href="create_customer.php">Create Customer</a></li>
@@ -38,7 +38,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="create_customer.php" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Product
+                        Products
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
                         <li><a class="dropdown-item" href="create_product.php">Create Product</a></li>
@@ -50,7 +50,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="create_customer.php" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Order
+                        Orders
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
                         <li><a class="dropdown-item" href="Order.php">Place Order</a></li>
@@ -60,6 +60,17 @@
                 </ul>
   
 
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="create_customer.php" id="navbarDarkDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Categories
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                        <li><a class="dropdown-item" href="product_category.php">Create Category</a></li>
+                        <li><a class="dropdown-item" href="category_index.php">Category Listing</a></li>
+                    </ul>
+                    </li>
+                </ul>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
                             <a class="btn btn-outline-danger" href="User_logout.php">Logout</a>
