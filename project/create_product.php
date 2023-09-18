@@ -215,10 +215,6 @@ include 'navbar.php';
                             value="<?php echo isset($promotion_price) ? $promotion_price : ''; ?>"></td>
                 </tr>
                 <tr>
-                    <td>Photo</td>
-                    <td><input type="file" name="image" /></td>
-                </tr>
-                <tr>
                     <td>Manufacture Date</td>
                     <td><input type='date' name='manufacture_date' class='form-control'
                             value="<?php echo isset($manufacture_date) ? $manufacture_date : ''; ?>"></td>
@@ -227,6 +223,10 @@ include 'navbar.php';
                     <td>Expired Date</td>
                     <td><input type='date' name='expire_date' class='form-control'
                             value="<?php echo isset($expire_date) ? $expire_date : ''; ?>"></td>
+                </tr>
+                <tr>
+                    <td>Photo</td>
+                    <td><input type="file" name="image" /></td>
                 </tr>
                 <tr>
                     <td></td>

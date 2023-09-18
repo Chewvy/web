@@ -226,7 +226,13 @@ include 'navbar.php';
                 </tr>
                 <tr>
                     <td>Photo</td>
-                    <td><input type="file" name="image" /></td>
+                    <td><input type="file" name="image" />
+                    <?php
+                        if (!empty($image)) {
+                            echo "<img src='image/$image' alt='Customer Image' style='max-width: 100px;' />";
+                        }
+                        ?>
+                    </td>
                 </tr>
                 <tr>
                     <td></td>
